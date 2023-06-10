@@ -1,0 +1,48 @@
+version: '3'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ${PROJECT_NAME}_web
+    volumes:
+      - .:${HOME_DIR}
+      - static_volume:${HOME_DIR}/static
+      - media_volume:${HOME_DIR}/media
+      - locale_volume:${HOME_DIR}/locale
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+    command: gunicorn core.wsgi:application --bind 0.0.0.0:${PORT}
+    ports:
+      - ${PORT}:${PORT}
+    restart: always
+
+  db:
+    image: postgres
+    container_name: ${PROJECT_NAME}_db
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_HOST: ${DB_HOST}
+      POSTGRES_PORT: ${DB_PORT}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    restart: always
+
+  redis:
+    image: redis:6.0-bullseye
+    container_name: ${PROJECT_NAME}_redis
+    restart: always
+
+volumes:
+  postgres_data: {}
+  static_volume: {}
+  media_volume: {}
+  locale_volume: {}

@@ -46,6 +46,8 @@ DJANGO_APPS = [
 ]
 
 CUSTOM_APPS = [
+    "apps.accounts",
+    "apps.base",
     "apps.common",
 ]
 
@@ -81,6 +83,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "core.urls"
+AUTH_USER_MODEL = "accounts.User"
 
 TEMPLATES = [
     {
@@ -164,7 +167,7 @@ CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
         "LOCATION": f"{env.str('REDIS_URL', 'redis://localhost:6379/0')}",
-        "KEY_PREFIX": "boilerplate",  # todo: you must change this with your project name or something else
+        "KEY_PREFIX": "django_docker_plate",
     }
 }
 
