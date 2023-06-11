@@ -1,29 +1,28 @@
-version: '3'
+version: '3.8'
 
 services:
   web:
     build:
       context: .
-      dockerfile: Dockerfile
     container_name: ${PROJECT_NAME}_web
     volumes:
-      - .:${HOME_DIR}
-      - static_volume:${HOME_DIR}/static
-      - media_volume:${HOME_DIR}/media
-      - locale_volume:${HOME_DIR}/locale
+#      - ./:/app
+      - static_volume:/app/static
+      - media_volume:/app/media
+      - locale_volume:/app/locale
     env_file:
       - .env
     depends_on:
-      - db
+      - postgres
       - redis
     command: gunicorn core.wsgi:application --bind 0.0.0.0:${PORT}
     ports:
       - ${PORT}:${PORT}
     restart: always
 
-  db:
+  postgres:
     image: postgres
-    container_name: ${PROJECT_NAME}_db
+    container_name: ${PROJECT_NAME}_postgres
     env_file:
       - .env
     environment:
