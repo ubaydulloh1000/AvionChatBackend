@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+<div class="container is-flex is-flex-direction-column is-justify-content-center" style="width: 30%; height: 100vh">
+    <h1 class="is-size-4 p-3">Login</h1>
+
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        {% if form.errors %}
+            <p>Your username and password didn't match. Please try again.</p>
+        {% endif %}
+
+        <button type="submit">Login</button>
+    </form>
+
+<!--    <div class="" style="width: 100%;">-->
+<!--        <div class="field">-->
+<!--            <p class="control has-icons-left has-icons-right">-->
+<!--                <input class="input is-dark" type="email" placeholder="Email">-->
+<!--                <span class="icon is-small is-left">-->
+<!--      <i class="fas fa-envelope"></i>-->
+<!--    </span>-->
+<!--                <span class="icon is-small is-right">-->
+<!--      <i class="fas fa-check"></i>-->
+<!--    </span>-->
+<!--            </p>-->
+<!--        </div>-->
+<!--        <div class="field">-->
+<!--            <p class="control has-icons-left">-->
+<!--                <input class="input is-dark" type="password" placeholder="Password">-->
+<!--                <span class="icon is-small is-left">-->
+<!--      <i class="fas fa-lock"></i>-->
+<!--    </span>-->
+<!--            </p>-->
+<!--        </div>-->
+<!--        <div class="field">-->
+<!--            <p class="control">-->
+<!--                <button class="button is-dark">-->
+<!--                    Login-->
+<!--                </button>-->
+<!--            </p>-->
+<!--        </div>-->
+<!--    </div>-->
+</div>
+{% endblock %}

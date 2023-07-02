@@ -8,7 +8,9 @@ from .schema import swagger_urlpatterns
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("chat/", include("apps.chat.urls")),
+    path("auth/", include("django.contrib.auth.urls")),
+    path("accounts/", include("apps.accounts.urls")),
+    path("", include("apps.chat.urls")),
 ]
 
 urlpatterns += swagger_urlpatterns

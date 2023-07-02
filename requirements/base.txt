@@ -12,3 +12,5 @@ daphne==4.0.0
 channels_redis==4.1.0
 redis==4.5.5
 selenium==4.10.0
+fontawesomefree==6.4.0
+Pillow==10.0.0

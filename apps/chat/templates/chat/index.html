@@ -4,14 +4,13 @@
 {% block site_title %}Chat Room{% endblock %}
 
 {% block content %}
-
-
-<h1>What chat room would you like to enter?</h1>
-
-<div class="input-group mb-3">
-    <input id="room-name-input" type="text" class="form-control" placeholder="Room name" aria-label="Username"
-           aria-describedby="basic-addon1">
-    <input id="room-name-submit" class="button gray" type="button" value="Enter">
+<div id="chat-main-columns" class="columns is-gapless p-3">
+    <div id="chat-list-sidebar" class="column has-background-grey-dark is-4">
+        {% include 'chat/chats_list.html' %}
+    </div>
+    <div id="chat-room" class="column is-8 has-background-grey-dark">
+        {% include 'chat/room.html' %}
+    </div>
 
 </div>
 

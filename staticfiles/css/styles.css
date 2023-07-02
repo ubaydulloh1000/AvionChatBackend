@@ -1,0 +1,32 @@
+.chat-list-item:hover {
+    background-color: hsl(0, 1%, 27%);
+}
+
+#chat-main-columns {
+    height: 100%;
+}
+#chat-list-sidebar {
+    height: 100%;
+}
+#chat-room{
+    height: 100%;
+}
+#chat-room .section{
+    height: 100%;
+}
+
+.people-list {
+    overflow: auto;
+    height: 94%;
+}
+#chat-log {
+    height: 100%;
+    overflow: auto;
+}
+
+#chat-log .is-left-message{
+    border-radius: 0 20px 20px 20px;
+}
+#chat-log .is-right-message{
+    border-radius: 20px 0 20px 20px;
+}

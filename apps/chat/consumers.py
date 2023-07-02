@@ -1,11 +1,18 @@
 import json
-
 from channels.generic.websocket import AsyncWebsocketConsumer
+
+from asgiref.sync import sync_to_async
+from apps.chat.models import Chat, Message
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
+
+        if self.scope["user"].is_anonymous:
+            await self.close()
+            return
+
+        self.room_name = self.scope["url_route"]["kwargs"]["chat_id"]
         self.room_group_name = "chat_%s" % self.room_name
 
         await self.channel_layer.group_add(
@@ -23,11 +30,28 @@ class ChatConsumer(AsyncWebsocketConsumer):
         text_data_json = json.loads(text_data)
         message = text_data_json["message"]
 
+        await self.save_message_to_database(message, self.scope["user"], chat_id=self.room_name)
+
         await self.channel_layer.group_send(
-            self.room_group_name, {"type": "chat_message", "message": message}
+            self.room_group_name, {
+                "type": "chat_message",
+                "username": self.scope["user"].username,
+                "chat_id": self.room_name,
+                "message": message
+            }
         )
 
     async def chat_message(self, event):
         message = event["message"]
+        username = event["username"]
+        chat_id = event["chat_id"]
+        await self.send(text_data=json.dumps({
+            "chat_type": "MESSAGE",
+            "username": username,
+            "chat_id": chat_id,
+            "message": message
+        }))
 
-        await self.send(text_data=json.dumps({"message": message}))
+    @sync_to_async
+    def save_message_to_database(self, message, user, chat_id):
+        Message.objects.create(sender=user, chat_id=chat_id, content=message)

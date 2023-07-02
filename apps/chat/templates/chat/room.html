@@ -1,27 +1,151 @@
-{% extends "base.html" %}
-{% load static %}
+<div class="section p-0" style="height: 100%">
 
-{% block site_title %}Chat Room{% endblock %}
+    {% if current_chat %}
+    <div class="is-flex is-flex-direction-column is-justify-content-space-between" style="height: 100%">
+        <div class="p-4" style="height: 6%; box-shadow: #464545 0 10px 10px">
+            <div class="" style="height: 100%">
+                <div style="height: 100%">
+                    <figure class="image is-32x32">
 
-{% block content %}
-<textarea id="chat-log" cols="100" rows="20"></textarea><br>
-<input id="chat-message-input" type="text" size="100"><br>
-<input id="chat-message-submit" type="button" value="Send">
+                        {% if current_chat.user1 == user %}
+                        {% if current_chat.user2.avatar %}
+                        <img class="is-rounded has-background-white" src="{{ current_chat.user2.avatar.url }}">
+                        {% else %}
+                        <img class="is-rounded"
+                             src="https://www.pngall.com/wp-content/uploads/5/User-Profile-PNG-Clipart.png" alt="deweg">
+                        {% endif %}
+                        {% else %}
+                        <img class="is-rounded" src="{{ current_chat.user1.avatar.url }}">
+                        {% endif %}
+                    </figure>
+
+                </div>
+            </div>
+        </div>
+        <div id="chat-place" style="height: 87%">
+
+            <div class="p-0" style="height: 100%">
+                <div id="chat-log" class="is-flex is-flex-direction-column p-4">
+                    {% for message in current_chat_message_queryset %}
+
+                    {% if message.sender == user %}
+                    <div class="is-flex is-flex-direction-row-reverse">
+                        <article class="card has-background-primary mb-4 p-4 is-right-message" style="max-width: 70%">
+                            <div class="">
+                                {{ message.content }}
+                                <p class="is-flex is-justify-content-flex-end">
+                                    <sub class="is-size-7 pl-3 pt-2">
+                                        {% if message.is_seen %}
+                                        <i class="fa-solid fa-check-double has-text-white pr-1"></i>
+                                        {% else %}
+                                        <i class="fa-solid fa-check has-text-white pr-1"></i>
+                                        {% endif %}
+                                        {{ message.created_at|date:"H:i" }}
+                                    </sub>
+                                </p>
+
+                            </div>
+                        </article>
+                    </div>
+                    {% else %}
+                    <div class="is-flex" style="width: 100%">
+                        <article class="card has-background-info mb-4 p-4 is-left-message" style="max-width: 70%">
+                            <div class="">
+                                {{ message.content }}
+                                <p class="is-flex is-justify-content-flex-end">
+                                    <sub class="is-size-7 pl-3 pt-2">
+                                        {{ message.created_at|date:"H:i" }}
+                                    </sub>
+                                </p>
+                            </div>
+                        </article>
+                    </div>
+                    {% endif %}
+
+                    {% endfor %}
+
+
+                </div>
+            </div>
+        </div>
+        <div class="" style="height: 7%">
+            <div class="chat-type-place" style="height: 100%">
+                <div class="is-flex is-justify-content-space-between" style="height: 100%">
+                    <div class="has-background-warning" style="width: 5%; height: 100%">
+                        <div class="chat-type-left-icon-place">
+                            <i class="fa-solid fa-paper-plane has-text-white m-auto"></i>
+                        </div>
+                    </div>
+                    <div class="has-background-info" style="width: 90%; height: 100%">
+                        <input id="chat-message-input" class="input"
+                               style="height: 100%; border: none; box-shadow: none;"
+                               type="text" placeholder="Text input">
+                    </div>
+                    <div class="has-background-link" style="width: 5%">
+                        <div class="chat-type-right-icon-place">
+                            <input id="chat-message-submit" type="button" value="Send">
+
+                            <i class="fa-solid fa-paper-plane has-text-white"></i>
+                            <i class="fa-regular fa-face-smile has-text-white"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <h1 class="has-text-white">
+        Select a chat
+    </h1>
+    {% endif %}
+</div>
+
 {{ room_name|json_script:"room-name" }}
 <script>
-    const roomName = JSON.parse(document.getElementById('room-name').textContent);
+    const chat_id = '{{ current_chat.id }}';
 
     const chatSocket = new WebSocket(
         'ws://'
         + window.location.host
         + '/ws/chat/'
-        + roomName
+        + chat_id
         + '/'
     );
 
+    var now = new Date();
+    var hours = now.getHours();
+    var minutes = now.getMinutes();
+
+    // Format the hours and minutes with leading zeros if needed
+    var formattedHours = (hours < 10 ? '0' : '') + hours;
+    var formattedMinutes = (minutes < 10 ? '0' : '') + minutes;
+
+
     chatSocket.onmessage = function (e) {
         const data = JSON.parse(e.data);
-        document.querySelector('#chat-log').value += (data.message + '\n');
+
+        if (data.username == '{{ user.username }}') {
+            message_html = '<div class="is-flex is-flex-direction-row-reverse" style="width: 100%">'
+            message_html += '<article class="card has-background-primary mb-4 p-4 is-right-message" style="max-width: 70%"><div class="">'
+            message_html += data.message
+            message_html += '<p class="is-flex is-justify-content-flex-end"><sub class="is-size-7 pl-3 pt-2"><i class="fa-solid fa-check-double has-text-white pr-1"></i>'
+            message_html += formattedHours + ':' + formattedMinutes
+            message_html += '</sub></p>'
+            message_html += '</div></article></div>'
+        } else {
+            message_html = '<div class="is-flex" style="width: 100%">'
+            message_html += '<article class="card has-background-info mb-4 p-4 is-left-message" style="max-width: 70%"><div class="">'
+            message_html += data.message
+            message_html += '<p class="is-flex is-justify-content-flex-end"><sub class="is-size-7 pl-3 pt-2">'
+            message_html += formattedHours + ':' + formattedMinutes + '</sub></p>'
+            message_html += '</div></article></div>'
+        }
+
+        const newElement = document.createElement('div');
+        newElement.innerHTML = message_html;
+        document.querySelector('#chat-log').appendChild(newElement);
+        document.querySelector('#chat-log').scrollTop = document.querySelector('#chat-log').scrollHeight;
+
     };
 
     chatSocket.onclose = function (e) {
@@ -38,11 +162,18 @@
     document.querySelector('#chat-message-submit').onclick = function (e) {
         const messageInputDom = document.querySelector('#chat-message-input');
         const message = messageInputDom.value;
+
+        var trimmedMessage = message.trim();
+        if (trimmedMessage.length == 0) {
+            return
+        }
+
         chatSocket.send(JSON.stringify({
-            'message': message
+            'message': message,
+            'chat_id': chat_id,
+            'username': '{{ user.username }}'
         }));
         messageInputDom.value = '';
+        scrollToBottom();
     };
 </script>
-
-{% endblock %}
