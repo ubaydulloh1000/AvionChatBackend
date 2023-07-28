@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+<div class="container is-flex is-flex-direction-column is-justify-content-center" style="width: 30%; height: 100vh">
+    <div class="card">
+        <div class="card-content">
+            <div class="media">
+                <div class="media-left">
+                    <figure class="image is-48x48">
+                        {% if user.avatar %}
+                        <img src="{{ user.avatar.url }}" alt="Placeholder image">
+                        {% else %}
+                        <img src="https://bulma.io/images/placeholders/96x96.png"
+                             alt="Placeholder image">
+                        {% endif %}
+                    </figure>
+                </div>
+                <div class="media-content">
+                    <p class="title is-4">{{ user.first_name }} {{ user.last_name }}</p>
+                    <p class="subtitle is-6">@{{ user.username }}</p>
+                </div>
+            </div>
+
+            <div class="content">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                Phasellus nec iaculis mauris. <a>@bulmaio</a>.
+                <a href="#">#css</a> <a href="#">#responsive</a>
+
+                <br>
+                <br>
+                <br>
+                <span>date joined: </span>
+                <time datetime="2016-1-1">{{ user.date_joined }}</time>
+            </div>
+
+            <div class="buttons">
+                <a class="button is-primary" href="{% url 'say_hello' user.id %}">
+                    Say hello
+                </a>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

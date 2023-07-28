@@ -1,8 +1,9 @@
 from django.db import models
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 
-from apps.chat.models import Message
+from apps.accounts.admin import User
+from apps.chat.models import Message, Chat
 
 
 @login_required
@@ -56,3 +57,26 @@ def chat_list(request):
 @login_required
 def room(request, room_name):
     return render(request, "chat/room.html", {"room_name": room_name})
+
+
+@login_required
+def say_hello(request, user_id):
+    user = User.objects.get(id=user_id)
+
+    chat, _ = Chat.objects.get_or_create(
+        type=Chat.ChatTypeChoices.PRIVATE,
+        name=request.user.username + " -> " + user.username,
+        owner=request.user,
+        user1=request.user,
+        user2=user,
+    )
+    chat.members.add(request.user)
+    chat.members.add(user)
+
+    Message.objects.create(
+        chat=chat,
+        sender=request.user,
+        content="Hello",
+        type=Message.MessageTypeChoices.TEXT,
+    )
+    return redirect("index")

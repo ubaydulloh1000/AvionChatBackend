@@ -9,13 +9,28 @@
 
                         {% if current_chat.user1 == user %}
                         {% if current_chat.user2.avatar %}
-                        <img class="is-rounded has-background-white" src="{{ current_chat.user2.avatar.url }}">
+                        <a href="{% url 'accounts:user_detail' current_chat.user2.id %}">
+                            <img class="is-rounded has-background-white" src="{{ current_chat.user2.avatar.url }}">
+                        </a>
                         {% else %}
-                        <img class="is-rounded"
-                             src="https://www.pngall.com/wp-content/uploads/5/User-Profile-PNG-Clipart.png" alt="deweg">
+                        <a href="{% url 'accounts:user_detail' current_chat.user2.id %}">
+                            <img class="is-rounded"
+                                 src="https://www.pngall.com/wp-content/uploads/5/User-Profile-PNG-Clipart.png"
+                                 alt="deweg">
+                        </a>
                         {% endif %}
                         {% else %}
-                        <img class="is-rounded" src="{{ current_chat.user1.avatar.url }}">
+                        {% if current_chat.user1.avatar %}
+                        <a href="{% url 'accounts:user_detail' current_chat.user1.id %}">
+                            <img class="is-rounded" src="{{ current_chat.user1.avatar.url }}">
+                        </a>
+                        {% else %}
+                        <a href="{% url 'accounts:user_detail' current_chat.user1.id %}">
+                            <img class="is-rounded"
+                                 src="https://www.pngall.com/wp-content/uploads/5/User-Profile-PNG-Clipart.png"
+                                 alt="deweg">
+                        </a>
+                        {% endif %}
                         {% endif %}
                     </figure>
 

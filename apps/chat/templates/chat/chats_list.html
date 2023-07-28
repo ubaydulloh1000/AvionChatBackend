@@ -4,7 +4,7 @@
     <div class="p-2" style="height: 6%">
         <div class="field">
             <div class="control">
-                <input class="input is-dark has-background-grey has-text-white" type="text" placeholder="Search...">
+                <input class="input is-dark has-background-grey has-text-white" type="text" placeholder="Search..." name="chat-list-search">
             </div>
         </div>
     </div>
@@ -25,9 +25,15 @@
                                     <div class="media">
                                         <div class="media-left">
                                             <figure class="image is-64x64">
-                                                <img class="is-rounded"
-                                                     src="https://bulma.io/images/placeholders/128x128.png"
-                                                     alt="Image">
+                                                {% if chat.user1 == user %}
+                                                <img class="is-rounded" src="{% if chat.user2.avatar %}{{ chat.user2.avatar.url }}{% else %} {% static 'images/avatar.png' %}{% endif %}" alt="Image">
+                                                {% else %}
+                                                {% if chat.user1.avatar %}
+                                                <img class="is-rounded" src="{{ chat.user1.avatar.url }}" alt="Image">
+                                                {% else %}
+                                                <img class="is-rounded" src="" alt="avatar">
+                                                {% endif %}
+                                                {% endif %}
                                             </figure>
                                         </div>
                                     </div>
@@ -49,11 +55,11 @@
                                 <div class="is-flex">
                                     <p class="px-1">
                                         {% if chat.last_message_is_owner_username == user.username %}
-                                            {% if chat.last_message_is_seen %}
-                                            <i class="has-text-success fa-solid fa-check-double"></i>
-                                            {% else %}
-                                            <i class="has-text-success fa-solid fa-check"></i>
-                                            {% endif %}
+                                        {% if chat.last_message_is_seen %}
+                                        <i class="has-text-success fa-solid fa-check-double"></i>
+                                        {% else %}
+                                        <i class="has-text-success fa-solid fa-check"></i>
+                                        {% endif %}
                                         {% endif %}
                                     </p>
                                     <p class="has-text-white">{{ chat.last_message_date|date:"H:i" }}</p>
