@@ -1,8 +1,18 @@
 from django.urls import path
-from django.contrib.auth.views import LoginView, LogoutView
-
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from . import views
 
 app_name = 'accounts'
 
-urlpatterns = []
+urlpatterns = [
+    path(
+        "login/",
+        TokenObtainPairView.as_view(),
+        name="token_obtain_pair",
+    ),
+    path(
+        "refresh/",
+        TokenRefreshView.as_view(),
+        name="token_refresh",
+    ),
+]
