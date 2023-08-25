@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "avionchatbackend"
+version = "0.1.0"
+description = ""
+authors = ["Ubaydulloh <ubaydulloh1000@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+django = "^4.2.4"
+djangorestframework = "3.14.0"
+psycopg2-binary = "2.9.6"
+python-environ = "0.4.54"
+django-cors-headers = "4.1.0"
+django-jazzmin = "2.6.0"
+drf-yasg = "1.21.6"
+django-filter = "23.2"
+requests = "2.31.0"
+channels = "4.0.0"
+daphne = "4.0.0"
+channels-redis = "4.1.0"
+redis = "4.5.5"
+pillow = "10.0.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

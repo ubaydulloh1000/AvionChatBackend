@@ -1,12 +1,12 @@
 version: '3.8'
 
 services:
-  web:
+  django:
     build:
       context: .
-    container_name: ${PROJECT_NAME}_web
+    container_name: ${COMPOSE_PROJECT_NAME}_django
     volumes:
-#      - ./:/app
+      - ./:/app
       - static_volume:/app/static
       - media_volume:/app/media
       - locale_volume:/app/locale
@@ -15,14 +15,14 @@ services:
     depends_on:
       - postgres
       - redis
-    command: gunicorn core.wsgi:application --bind 0.0.0.0:${PORT}
+    command: gunicorn core.wsgi:application --bind 0.0.0.0:${DJANGO_PORT}
     ports:
-      - ${PORT}:${PORT}
+      - ${DJANGO_PORT}:${DJANGO_PORT}
     restart: always
 
   postgres:
     image: postgres
-    container_name: ${PROJECT_NAME}_postgres
+    container_name: ${COMPOSE_PROJECT_NAME}_postgres
     env_file:
       - .env
     environment:
@@ -37,7 +37,22 @@ services:
 
   redis:
     image: redis:6.0-bullseye
-    container_name: ${PROJECT_NAME}_redis
+    container_name: ${COMPOSE_PROJECT_NAME}_redis
+    restart: always
+
+  daphne:
+    build:
+      context: .
+    container_name: ${COMPOSE_PROJECT_NAME}_daphne
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - redis
+      - django
+    command: daphne --port ${DAPHNE_PORT} core.asgi:application
+    ports:
+      - ${DAPHNE_PORT}:${DAPHNE_PORT}
     restart: always
 
 volumes:
