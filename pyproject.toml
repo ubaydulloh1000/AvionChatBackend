@@ -21,6 +21,7 @@ daphne = "4.0.0"
 channels-redis = "4.1.0"
 redis = "4.5.5"
 pillow = "10.0.0"
+fontawesomefree = "6.4.0"
 
 
 [build-system]

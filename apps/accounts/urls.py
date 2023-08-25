@@ -5,10 +5,4 @@ from . import views
 
 app_name = 'accounts'
 
-urlpatterns = [
-    path('login/', LoginView.as_view(template_name='accounts/login.html', success_url="chat/"), name='login'),
-    path('logout/', LogoutView.as_view(), name='logout'),
-    path('signup/', views.RegisterView.as_view(), name='signup'),
-    path('user/detail/<int:pk>/', views.user_detail, name='user_detail'),
-    path('list/search/', views.user_list, name='user_list'),
-]
+urlpatterns = []

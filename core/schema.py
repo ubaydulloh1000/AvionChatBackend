@@ -7,16 +7,16 @@ from .generator import BothHttpAndHttpsSchemaGenerator
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="UIC API",
+        title="Avion Chat API",
         default_version="v1",
-        description="UIC Group",
+        description="Avion chat backend API",
         terms_of_service="https://www.google.com/policies/terms/",
-        contact=openapi.Contact(email="info@uic.group"),
+        contact=openapi.Contact(email="ubaydulloh1000@gmail.com"),
         license=openapi.License(name="BSD License"),
     ),
     public=True,
     generator_class=BothHttpAndHttpsSchemaGenerator,
-    permission_classes=(permissions.AllowAny,),
+    permission_classes=[permissions.AllowAny],
 )
 swagger_urlpatterns = [
     re_path(
