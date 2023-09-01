@@ -5,6 +5,8 @@ from django.apps import apps
 from django.contrib.auth.hashers import make_password
 from django.utils.translation import gettext_lazy as _
 
+from apps.base.models import TimeStampedModel
+
 
 class UserManager(_UserManager):
     def _create_user(self, username, email, password, **extra_fields):
@@ -55,3 +57,34 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.username
+
+
+class AccountSettings(TimeStampedModel):
+    class Meta:
+        db_table = "account_settings"
+        verbose_name = _("Account Settings")
+        verbose_name_plural = _("Account Settings")
+
+    user = models.OneToOneField(
+        verbose_name=_("User"),
+        to="accounts.User",
+        related_name="account_settings",
+        on_delete=models.CASCADE,
+    )
+    show_last_seen = models.BooleanField(verbose_name=_("Show Last Seen"), default=True)
+    show_read_receipts = models.BooleanField(
+        verbose_name=_("Show Read Receipts"),
+        help_text=_("Show Read Receipts in Private Chats"),
+        default=True,
+    )
+    allow_to_add_groups = models.BooleanField(verbose_name=_("Allow to Add Groups"), default=True)
+    allow_private_messages_to_non_contacts = models.BooleanField(
+        verbose_name=_("Allow Private Messages to Non Contacts"), default=True
+    )
+
+    push_notifications_enabled = models.BooleanField(
+        verbose_name=_("Push Notifications Enabled"), default=True
+    )
+
+    def __str__(self):
+        return f"{self.user}"

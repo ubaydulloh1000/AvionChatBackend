@@ -2,10 +2,13 @@ from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin, GroupAdmin as BaseGroupAdmin
 from django.utils.translation import gettext_lazy as _
+from django.apps import apps
 
 from django.contrib.auth.models import Group
+from apps.base.admin import BaseAdmin
 
 User = get_user_model()
+AccountSettings = apps.get_model("accounts", "AccountSettings")
 
 admin.site.unregister(Group)
 
@@ -45,3 +48,8 @@ class UserAdmin(BaseUserAdmin):
             },
         ),
     )
+
+
+@admin.register(AccountSettings)
+class AccountSettingsAdmin(BaseAdmin):
+    pass

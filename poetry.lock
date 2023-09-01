@@ -399,6 +399,21 @@ argon2 = ["argon2-cffi (>=19.1.0)"]
 bcrypt = ["bcrypt"]
 
 [[package]]
+name = "django-channels-jwt-auth-middleware"
+version = "1.0.0"
+description = "JWT Auth Middleware for Django Channels"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "django-channels-jwt-auth-middleware-1.0.0.tar.gz", hash = "sha256:7fdaaf419ef7f800d0da990d8e0ca53f7d120a66de7fb4446f77607ea3b3dd76"},
+]
+
+[package.dependencies]
+channels = ">=3.0.0"
+django = ">=3.1.0"
+pyjwt = ">=2.0.0"
+
+[[package]]
 name = "django-cors-headers"
 version = "4.1.0"
 description = "django-cors-headers is a Django application for handling the server headers required for Cross-Origin Resource Sharing (CORS)."
@@ -1219,4 +1234,4 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "d13a1c75ca6aa1121d31eecf765470e2418d093a36051c1d48dbfa49a66b7a51"
+content-hash = "6715b4d65481ec9c55efa85233efcf7be5d0d012c399ee5c63bcecdb9e5c5860"
