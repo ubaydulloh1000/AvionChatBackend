@@ -54,6 +54,8 @@ class User(AbstractUser):
     objects = UserManager()
 
     avatar = models.ImageField(verbose_name=_("Avatar"), upload_to='accounts/avatars/%Y/%m', null=True, blank=True)
+    is_online = models.BooleanField(verbose_name=_("Is Online"), default=False)
+    last_seen_at = models.DateTimeField(verbose_name=_("Last Seen At"), null=True, blank=True)
 
     def __str__(self):
         return self.username

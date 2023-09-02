@@ -27,6 +27,12 @@ class Chat(TimeStampedModel):
         null=True,
     )
     name = models.CharField(verbose_name=_("Name"), max_length=255)
+    image = models.ImageField(
+        verbose_name=_("Image"),
+        upload_to="chat_avatars/%Y/%m/",
+        null=True,
+        blank=True,
+    )
     owner = models.ForeignKey(
         verbose_name=_("Owner"),
         to="accounts.User",
@@ -58,6 +64,13 @@ class Chat(TimeStampedModel):
 
     def __str__(self):
         return self.name
+
+    def is_permitted(self, user: UserModel) -> bool:
+        return bool(
+            self.group_memberships.filter(pk=user.pk).exists() or
+            self.channel_subscriptions.filter(pk=user.pk).exists() or
+            self.private_chat_memberships.filter(pk=user.pk).exists()
+        )
 
 
 class GroupMembership(TimeStampedModel):
@@ -177,6 +190,7 @@ class Message(TimeStampedModel):
     is_seen = models.BooleanField(verbose_name=_("Is Seen"), default=False)
     seen_at = models.DateTimeField(verbose_name=_("Seen At"), null=True, blank=True)
     is_edited = models.BooleanField(verbose_name=_("Is Edited"), default=False)
+    is_reacted = models.BooleanField(verbose_name=_("Is Reacted"), default=False)
 
     def __str__(self):
         return self.type

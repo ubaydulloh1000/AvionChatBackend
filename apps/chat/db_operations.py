@@ -12,19 +12,53 @@ from . import utils
 
 
 @database_sync_to_async
+def get_chat_by_id(chat_id: int) -> Awaitable[Optional[models.Chat]]:
+    return models.Chat.objects.filter(id=chat_id).first()
+
+
+@database_sync_to_async
+def check_chat_is_permitted(chat: models.Chat, user: User) -> bool:
+    return chat.is_permitted(user)
+
+
+@database_sync_to_async
 def get_user_by_pk(pk: int) -> Awaitable[Optional[AbstractBaseUser]]:
     return User.objects.filter(pk=pk).first()
 
 
 @database_sync_to_async
-def create_message(chat: models.Chat, sndr: User, rpt: User, m_type: str, content) -> Awaitable[models.Message]:
-    match m_type:
-        case utils.MessageTypeEnum.TEXT.value:
-            msg = create_text_message(chat, sndr, rpt, content)
-        case utils.MessageTypeEnum.FILE.value:
-            msg = create_file_message(chat, sndr, rpt, content)
-        case _:
-            raise ValueError("Unknown message type")
+def user_is_online(user: User) -> bool:
+    return user.is_online
+
+
+@database_sync_to_async
+def set_user_online(user: User) -> Awaitable[None]:
+    user.is_online = True
+    user.last_seen_at = timezone.now()
+    return user.save()
+
+
+@database_sync_to_async
+def set_user_offline(user: User) -> Awaitable[None]:
+    user.is_online = False
+    user.last_seen_at = timezone.now()
+    return user.save()
+
+
+@database_sync_to_async
+def save_message_to_db(chat: models.Chat, sndr: User, rcpt: User, msg_type, content) -> Awaitable[models.Message]:
+    if msg_type == Message.MessageTypeChoices.TEXT.value:
+        msg = Message(
+            chat=chat,
+            sender=sndr,
+            recipient=rcpt,
+            type=msg_type,
+            content=content,
+        )
+    else:
+        # TODO: handle file messages, etc.
+        return
+    msg.save()
     return msg
 
 

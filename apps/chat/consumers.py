@@ -3,7 +3,8 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 
 from asgiref.sync import sync_to_async
 from apps.chat.models import Chat, Message
-from . import utils
+from . import utils, db_operations
+from apps.chat.serializers import MessageListSerializer
 
 
 class UserConsumer(AsyncWebsocketConsumer):
@@ -53,19 +54,48 @@ class ChatConsumer(AsyncWebsocketConsumer):
         if self.scope["user"].is_anonymous:
             await self.close()
             return
+        chat_id = self.scope["url_route"]["kwargs"]["chat_id"]
+        chat = await db_operations.get_chat_by_id(chat_id)
+        if chat is None:
+            await self.close()
+            return
 
-        self.room_name = self.scope["url_route"]["kwargs"]["chat_id"]
-        self.room_group_name = "chat_%s" % self.room_name
+        if not await db_operations.check_chat_is_permitted(chat, self.scope["user"]):
+            await self.close()
+            return
+
+        self.room_name = 'private_chat_{chat_id}'.format(chat_id=self.scope["url_route"]["kwargs"]["chat_id"])
+        self.room_group_name = "group_%s" % self.room_name
 
         await self.channel_layer.group_add(
             self.room_group_name, self.channel_name
         )
-
         await self.accept()
+
+    async def accept(self, subprotocol=None):
+        await super().accept(subprotocol=subprotocol)
+        await db_operations.set_user_online(self.scope["user"])
+        await self.channel_layer.group_send(
+            self.room_group_name, {
+                "type": self.send_online_offline_event.__name__,
+                "EVENT_TYPE": utils.SendMessageEventTypesEnum.PRIVATE_CHAT_ONLINE_STATUS.value,
+                "is_online": True,
+                "user_id": self.scope["user"].id
+            }
+        )
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(
             self.room_group_name, self.channel_name
+        )
+        await db_operations.set_user_offline(self.scope["user"])
+        await self.channel_layer.group_send(
+            self.room_group_name, {
+                "type": self.send_online_offline_event.__name__,
+                "EVENT_TYPE": utils.SendMessageEventTypesEnum.PRIVATE_CHAT_ONLINE_STATUS.value,
+                "is_online": False,
+                "user_id": self.scope["user"].id
+            }
         )
 
     async def receive(self, text_data):
@@ -74,54 +104,53 @@ class ChatConsumer(AsyncWebsocketConsumer):
         except json.JSONDecodeError:
             return
 
-        action = text_data_json.get("action", None)
-        match action:
-            case utils.ChatActionEnum.MESSAGE_SEND.value:
-                # MESSAGE: {
-                #   "action": "message_send",
-                #   "recipient": 123,
-                #   "message_type": "text",
-                #   "message": "Hello world!",
-                # }
-                pass
+        event_type = text_data_json.get("EVENT_TYPE")
+        if event_type == utils.ReceiveMessageEventTypesEnum.CHECK_PRIVATE_CHAT_USER_ONLINE.value:
+            is_online = await db_operations.user_is_online(text_data_json["user_id"])
+            event = {
+                "type": self.send_online_offline_event.__name__,
+                "EVENT_TYPE": utils.SendMessageEventTypesEnum.PRIVATE_CHAT_ONLINE_STATUS.value,
+                "is_online": is_online,
+                "user_id": text_data_json["user_id"]
+            }
+            await self.channel_layer.group_send(
+                self.room_group_name, event
+            )
+        elif event_type == utils.ReceiveMessageEventTypesEnum.PRIVATE_CHAT_SEND_MESSAGE.value:
+            chat_id = self.scope["url_route"]["kwargs"]["chat_id"]
+            sender = self.scope["user"]
+            receiver_id = text_data_json.get("receiver_id")
+            message_type = text_data_json.get("message_type")
+            message_content = text_data_json.get("message_text")
 
-            case utils.ChatActionEnum.MESSAGE_SEE.value:
-                pass
-            case _:
-                # JUST DO NOTHING
+            chat = await db_operations.get_chat_by_id(chat_id)
+            receiver = await db_operations.get_user_by_pk(receiver_id)
+
+            chat_permittable = await db_operations.check_chat_is_permitted(chat, receiver)
+            if not chat_permittable:
                 return
 
-        message = text_data_json["message"]
-
-        await self.channel_layer.group_send(
-            self.room_group_name, {
+            msg = await db_operations.save_message_to_db(
+                chat=chat,
+                sndr=sender,
+                rcpt=receiver,
+                msg_type=message_type,
+                content=message_content,
+            )
+            event = {
                 "type": self.send_private_chat_message.__name__,
-                "action": text_data_json["action"],
-                "receiver_id": text_data_json["receiver"],
-                "message_type": text_data_json["message_type"],
-                "message": message
+                "EVENT_TYPE": utils.SendMessageEventTypesEnum.PRIVATE_CHAT_SEND_MESSAGE.value,
+                "message": MessageListSerializer(msg).data
             }
-        )
+            await self.channel_layer.group_send(
+                self.room_group_name, event
+            )
+
+    async def send_online_offline_event(self, event):
+        await self.send(text_data=json.dumps(event))
 
     async def send_private_chat_message(self, event):
-        action = event["action"]
-        sender = self.scope["user"]
-        receiver_id = event["receiver_id"]
-        message_type = event["message_type"]
-        message = event["message"]
-
-        await self.send(
-            text_data=json.dumps(
-                {
-                    "chat_type": Chat.ChatTypeChoices.PRIVATE.value,
-                    "action": action,
-                    "sender_id": sender.id,
-                    "receiver_id": receiver_id,
-                    "message_type": message_type,
-                    "message": message
-                }
-            )
-        )
+        await self.send(text_data=json.dumps(event))
 
     @sync_to_async
     def save_message_to_database(self, message, user, chat_id):

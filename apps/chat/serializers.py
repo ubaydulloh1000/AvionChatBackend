@@ -90,11 +90,14 @@ class ChatCreateSerializer(serializers.ModelSerializer):
 class ChatListSerializer(serializers.ModelSerializer):
     class _ChatSerializer(serializers.ModelSerializer):
         class _UserSerializer(serializers.ModelSerializer):
+            full_name = serializers.CharField(source="get_full_name")
+
             class Meta:
                 model = User
                 fields = (
                     'id',
                     'username',
+                    "full_name",
                     'avatar',
                 )
 
@@ -105,6 +108,7 @@ class ChatListSerializer(serializers.ModelSerializer):
             fields = (
                 "id",
                 "name",
+                "image",
                 "type",
                 "user",
             )
@@ -137,3 +141,92 @@ class ChatListSerializer(serializers.ModelSerializer):
         elif hasattr(obj, "channel"):
             return self._ChatSerializer(obj.channel, context={"request": self.context["request"]}).data
         return None
+
+
+class ChatDetailSerializer(serializers.ModelSerializer):
+    class ChatSerializer(serializers.ModelSerializer):
+        user = serializers.SerializerMethodField()
+
+        class UserSerializer(serializers.ModelSerializer):
+            class Meta:
+                model = User
+                fields = (
+                    'id',
+                    'username',
+                    'avatar',
+                    'first_name',
+                    'last_name',
+                    "last_seen_at",
+                )
+
+        class Meta:
+            model = models.Chat
+            fields = (
+                "id",
+                "name",
+                "image",
+                "type",
+                "user",
+            )
+
+        def get_user(self, obj):
+            if obj.type == models.Chat.ChatTypeChoices.PRIVATE:
+                if obj.user1_id == self.context["request"].user.id:
+                    return self.UserSerializer(obj.user2, context={"request": self.context["request"]}).data
+                return self.UserSerializer(obj.user1, context={"request": self.context["request"]}).data
+            return None
+
+    chat = serializers.SerializerMethodField()
+
+    class Meta:
+        model = models.PrivateChatMembership
+        fields = (
+            'id',
+            "chat",
+            "is_archived",
+            "is_muted",
+            'created_at',
+            'updated_at',
+        )
+
+    def get_chat(self, obj):
+        if hasattr(obj, "chat"):
+            return self.ChatSerializer(obj.chat, context={"request": self.context["request"]}).data
+        elif hasattr(obj, "group"):
+            return self.ChatSerializer(obj.group, context={"request": self.context["request"]}).data
+        elif hasattr(obj, "channel"):
+            return self.ChatSerializer(obj.channel, context={"request": self.context["request"]}).data
+        return None
+
+
+class MessageListSerializer(serializers.ModelSerializer):
+    class UserSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = User
+            fields = (
+                'id',
+                'username',
+                'avatar',
+                'first_name',
+                'last_name',
+                "last_seen_at",
+            )
+
+    sender = UserSerializer()
+    recipient = UserSerializer()
+
+    class Meta:
+        model = models.Message
+        fields = (
+            'id',
+            'chat',
+            'type',
+            'sender',
+            'recipient',
+            'content',
+            'is_seen',
+            'seen_at',
+            'is_edited',
+            'is_reacted',
+            'created_at',
+        )
