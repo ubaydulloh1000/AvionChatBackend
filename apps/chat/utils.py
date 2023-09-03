@@ -4,13 +4,13 @@ from dataclasses import dataclass
 
 class SendMessageEventTypesEnum(Enum):
     PRIVATE_CHAT_ONLINE_STATUS = 'private_chat_online_status'
-    PRIVATE_CHAT_TYPING = 'private_chat_typing'
-    PRIVATE_CHAT_STOPPED_TYPING = 'private_chat_stopped_typing'
+    PRIVATE_CHAT_USER_TYPING_STATUS = 'private_chat_user_typing_status'
     PRIVATE_CHAT_SEND_MESSAGE = 'private_chat_send_message'
 
 
 class ReceiveMessageEventTypesEnum(Enum):
     CHECK_PRIVATE_CHAT_USER_ONLINE = 'check_private_chat_user_online'
+    PRIVATE_CHAT_USER_TYPING_STATUS = 'private_chat_user_typing_status'
     PRIVATE_CHAT_SEND_MESSAGE = 'private_chat_send_message'
 
 

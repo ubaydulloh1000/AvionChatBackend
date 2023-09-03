@@ -67,5 +67,5 @@ class MessageListView(generics.ListAPIView):
         if not chat.is_permitted(self.request.user):
             raise exceptions.PermissionDenied()
 
-        qs = self.queryset.filter(chat=chat)
+        qs = self.queryset.filter(chat=chat).order_by("-created_at")
         return qs

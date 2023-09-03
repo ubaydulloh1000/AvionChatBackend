@@ -67,9 +67,9 @@ class Chat(TimeStampedModel):
 
     def is_permitted(self, user: UserModel) -> bool:
         return bool(
-            self.group_memberships.filter(pk=user.pk).exists() or
-            self.channel_subscriptions.filter(pk=user.pk).exists() or
-            self.private_chat_memberships.filter(pk=user.pk).exists()
+            self.group_memberships.filter(user_id=user.pk).exists() or
+            self.channel_subscriptions.filter(subscriber_id=user.pk).exists() or
+            self.private_chat_memberships.filter(user_id=user.pk).exists()
         )
 
 

@@ -106,7 +106,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         event_type = text_data_json.get("EVENT_TYPE")
         if event_type == utils.ReceiveMessageEventTypesEnum.CHECK_PRIVATE_CHAT_USER_ONLINE.value:
-            is_online = await db_operations.user_is_online(text_data_json["user_id"])
+            user = await db_operations.get_user_by_pk(text_data_json["user_id"])
+            is_online = await db_operations.user_is_online(user)
+
             event = {
                 "type": self.send_online_offline_event.__name__,
                 "EVENT_TYPE": utils.SendMessageEventTypesEnum.PRIVATE_CHAT_ONLINE_STATUS.value,
@@ -141,6 +143,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "type": self.send_private_chat_message.__name__,
                 "EVENT_TYPE": utils.SendMessageEventTypesEnum.PRIVATE_CHAT_SEND_MESSAGE.value,
                 "message": MessageListSerializer(msg).data
+            }
+            await self.channel_layer.group_send(
+                self.room_group_name, event
+            )
+        elif event_type == utils.ReceiveMessageEventTypesEnum.PRIVATE_CHAT_USER_TYPING_STATUS.value:
+            event = {
+                "type": self.send_private_chat_message.__name__,
+                "EVENT_TYPE": utils.SendMessageEventTypesEnum.PRIVATE_CHAT_USER_TYPING_STATUS.value,
+                "user_id": text_data_json["user_id"],
+                "is_typing": text_data_json["is_typing"]
             }
             await self.channel_layer.group_send(
                 self.room_group_name, event
