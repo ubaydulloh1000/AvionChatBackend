@@ -1,28 +1,33 @@
 version: '3.8'
 
+networks:
+  default:
+    name: ${COMPOSE_PROJECT_NAME}_network
+    driver: bridge
+
 services:
   django:
+    image: shly-uz-chat-backend:latest
     build:
       context: .
-    container_name: ${COMPOSE_PROJECT_NAME}_django
+    container_name: ${COMPOSE_PROJECT_NAME}-django
     volumes:
       - ./:/app
       - static_volume:/app/static
       - media_volume:/app/media
-      - locale_volume:/app/locale
     env_file:
       - .env
     depends_on:
       - postgres
       - redis
-    command: gunicorn core.wsgi:application --bind 0.0.0.0:${DJANGO_PORT}
+    command: poetry run gunicorn core.wsgi:application --bind 0.0.0.0:${DJANGO_PORT}
     ports:
       - ${DJANGO_PORT}:${DJANGO_PORT}
     restart: always
 
   postgres:
-    image: postgres
-    container_name: ${COMPOSE_PROJECT_NAME}_postgres
+    image: postgres:15-alpine
+    container_name: ${COMPOSE_PROJECT_NAME}-postgres
     env_file:
       - .env
     environment:
@@ -36,27 +41,25 @@ services:
     restart: always
 
   redis:
-    image: redis:6.0-bullseye
-    container_name: ${COMPOSE_PROJECT_NAME}_redis
+    image: redis:6.2-alpine
+    container_name: ${COMPOSE_PROJECT_NAME}-redis
     restart: always
 
   daphne:
-    build:
-      context: .
-    container_name: ${COMPOSE_PROJECT_NAME}_daphne
+    image: shly-uz-chat-backend:latest
+    container_name: ${COMPOSE_PROJECT_NAME}-daphne
+    volumes:
+      - ./:/app
     env_file:
       - .env
     depends_on:
-      - postgres
-      - redis
       - django
-    command: daphne --port ${DAPHNE_PORT} core.asgi:application
+    command: poetry run daphne core.asgi:application -b 0.0.0.0 -p ${DAPHNE_PORT}
     ports:
       - ${DAPHNE_PORT}:${DAPHNE_PORT}
     restart: always
 
 volumes:
-  postgres_data: {}
-  static_volume: {}
-  media_volume: {}
-  locale_volume: {}
+  postgres_data: { }
+  static_volume: { }
+  media_volume: { }
