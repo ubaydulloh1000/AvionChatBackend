@@ -2,8 +2,7 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from apps.base.models import TimeStampedModel
 from django.utils.translation import gettext_lazy as _
-
-from channels.db import database_sync_to_async
+from . import managers
 
 UserModel = get_user_model()
 
@@ -95,6 +94,8 @@ class GroupMembership(TimeStampedModel):
     is_archived = models.BooleanField(verbose_name=_("Is Archived"), default=False)
     is_muted = models.BooleanField(verbose_name=_("Is Muted"), default=False)
 
+    objects = managers.GroupMembershipQuerySet.as_manager()
+
     def __str__(self):
         return f"{self.group} - {self.user}"
 
@@ -121,6 +122,8 @@ class ChannelSubscription(TimeStampedModel):
     is_archived = models.BooleanField(verbose_name=_("Is Archived"), default=False)
     is_muted = models.BooleanField(verbose_name=_("Is Muted"), default=False)
 
+    objects = managers.ChannelSubscriptionQuerySet.as_manager()
+
     def __str__(self):
         return f"{self.channel} - {self.subscriber}"
 
@@ -146,6 +149,8 @@ class PrivateChatMembership(TimeStampedModel):
     )
     is_archived = models.BooleanField(verbose_name=_("Is Archived"), default=False)
     is_muted = models.BooleanField(verbose_name=_("Is Muted"), default=False)
+
+    objects = managers.PrivateChatMembershipQuerySet.as_manager()
 
     def __str__(self):
         return f"{self.chat} - {self.user}"

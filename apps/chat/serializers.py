@@ -121,6 +121,9 @@ class ChatListSerializer(serializers.ModelSerializer):
             return None
 
     chat = serializers.SerializerMethodField()
+    unseen_messages_count = serializers.IntegerField(default=0)
+    last_message_created_at = serializers.DateTimeField(read_only=True, default=None)
+    last_message_content = serializers.CharField(read_only=True, default="")
 
     class Meta:
         model = models.PrivateChatMembership
@@ -129,6 +132,9 @@ class ChatListSerializer(serializers.ModelSerializer):
             "chat",
             "is_archived",
             "is_muted",
+            "unseen_messages_count",
+            "last_message_created_at",
+            "last_message_content",
             'created_at',
             'updated_at',
         )
