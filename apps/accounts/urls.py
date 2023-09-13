@@ -29,5 +29,15 @@ urlpatterns = [
         "check-username-available/",
         views.CheckUsernameAvailableView.as_view(),
         name="check_username_available",
-    )
+    ),
+    path(
+        "list/",
+        views.UserListAPIView.as_view(),
+        name="user_list",
+    ),
+    path(
+        "profile/<int:pk>/",
+        views.UserProfileAPIView.as_view(),
+        name="user_profile",
+    ),
 ]

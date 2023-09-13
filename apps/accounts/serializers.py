@@ -58,3 +58,32 @@ class AccountDetailSerializer(serializers.ModelSerializer):
             'date_joined',
             "account_settings",
         )
+
+
+class UserListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.User
+        fields = (
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "avatar",
+            "is_online",
+            "last_seen_at",
+        )
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.User
+        fields = (
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "email",
+            "avatar",
+            "is_online",
+            "last_seen_at",
+        )

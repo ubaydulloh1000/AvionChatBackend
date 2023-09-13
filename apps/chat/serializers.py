@@ -35,22 +35,28 @@ class ChatCreateSerializer(serializers.ModelSerializer):
             )
         return chat_type
 
-    def validate(self, attrs):
-        match attrs['type']:
-            case models.Chat.ChatTypeChoices.PRIVATE:
-                if attrs.get("user") is not None and models.Chat.objects.filter(
-                        user1=self.context["request"].user, user2=attrs["user"]
-                ).exists():
-                    raise serializers.ValidationError(
-                        code="already_exists_chat", detail={"user": "Private chat between these users already exists."}
-                    )
-        return attrs
+    # def validate(self, attrs):
+    #     match attrs['type']:
+    #         case models.Chat.ChatTypeChoices.PRIVATE:
+    #             if attrs.get("user") is not None and models.Chat.objects.filter(
+    #                     user1=self.context["request"].user, user2=attrs["user"]
+    #             ).exists():
+    #                 raise serializers.ValidationError(
+    #                     code="already_exists_chat", detail={"user": "Private chat between these users already exists."}
+    #                 )
+    #     return attrs
 
     def create(self, validated_data):
         validated_data["owner"] = self.context["request"].user
         chat_type = validated_data['type']
 
         if chat_type == models.Chat.ChatTypeChoices.PRIVATE:
+            old_chat = models.Chat.objects.filter(
+                user1=self.context["request"].user, user2=validated_data["user"]
+            ).first()
+            if old_chat is not None:
+                return old_chat
+
             user = validated_data.get("user")
             if user is None:
                 raise serializers.ValidationError(
