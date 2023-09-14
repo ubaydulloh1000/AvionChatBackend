@@ -157,6 +157,12 @@ class PrivateChatMembership(TimeStampedModel):
 
 
 class Message(TimeStampedModel):
+    class Meta:
+        db_table = "message"
+        verbose_name = _("Message")
+        verbose_name_plural = _("Messages")
+        ordering = ("-created_at",)
+
     class MessageTypeChoices(models.TextChoices):
         TEXT = "TEXT", _("Text")
         IMAGE = "IMAGE", _("Image")

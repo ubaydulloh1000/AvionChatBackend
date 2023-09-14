@@ -1,4 +1,4 @@
-from django.db.models import Max
+from django.db.models import Max, F, OuterRef, Subquery, DateTimeField, TextField
 from rest_framework import generics, permissions, exceptions, filters
 from django_filters.rest_framework import DjangoFilterBackend
 from . import models, serializers
@@ -21,25 +21,13 @@ class ChatListView(generics.ListAPIView):
     def filter_queryset(self, queryset):
         search_query = self.request.query_params.get("search", None)
         user = self.request.user
-        # annotate last group message id, created_at, content
-        group_chats = user.group_memberships.all() \
-            .annotate_unseen_messages_count(user).annotate(
-            last_message_created_at=Max("group__messages__created_at"),
-            # last_message_type=Max("group__messages__type"),
-            last_message_content=Max("group__messages__content"),
-        )
 
-        channel_chats = user.channel_subscriptions.all() \
-            .annotate_unseen_messages_count(user).annotate(
-            last_message_created_at=Max("channel__messages__created_at"),
-            # last_message_type=Max("channel__messages__type"),
-            last_message_content=Max("channel__messages__content"),
-        )
-        private_chats = user.private_chat_memberships.annotate_unseen_messages_count(user).annotate(
-            last_message_created_at=Max("chat__messages__created_at"),
-            # last_message_type=Max("chat__messages__type"),
-            last_message_content=Max("chat__messages__content"),
-        )
+        group_chats = user.group_memberships.annotate_unseen_messages_count(user) \
+            .annotate_last_message(outer_ref_name="group_id")
+        channel_chats = user.channel_subscriptions.annotate_unseen_messages_count(user). \
+            annotate_last_message(outer_ref_name="channel_id")
+        private_chats = user.private_chat_memberships.annotate_unseen_messages_count(user). \
+            annotate_last_message(outer_ref_name="chat_id")
 
         is_archived = self.request.query_params.get("is_archived", None)
         if is_archived is not None:

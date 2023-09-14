@@ -1,3 +1,4 @@
+from django.db.models import Q
 from rest_framework import serializers
 
 from apps.accounts.models import User
@@ -35,24 +36,14 @@ class ChatCreateSerializer(serializers.ModelSerializer):
             )
         return chat_type
 
-    # def validate(self, attrs):
-    #     match attrs['type']:
-    #         case models.Chat.ChatTypeChoices.PRIVATE:
-    #             if attrs.get("user") is not None and models.Chat.objects.filter(
-    #                     user1=self.context["request"].user, user2=attrs["user"]
-    #             ).exists():
-    #                 raise serializers.ValidationError(
-    #                     code="already_exists_chat", detail={"user": "Private chat between these users already exists."}
-    #                 )
-    #     return attrs
-
     def create(self, validated_data):
         validated_data["owner"] = self.context["request"].user
         chat_type = validated_data['type']
 
         if chat_type == models.Chat.ChatTypeChoices.PRIVATE:
             old_chat = models.Chat.objects.filter(
-                user1=self.context["request"].user, user2=validated_data["user"]
+                Q(user1=self.context["request"].user, user2=validated_data["user"]) |
+                Q(user1=validated_data["user"], user2=self.context["request"].user)
             ).first()
             if old_chat is not None:
                 return old_chat
@@ -130,6 +121,8 @@ class ChatListSerializer(serializers.ModelSerializer):
     unseen_messages_count = serializers.IntegerField(default=0)
     last_message_created_at = serializers.DateTimeField(read_only=True, default=None)
     last_message_content = serializers.CharField(read_only=True, default="")
+    last_message_sender_id = serializers.IntegerField(read_only=True, default=None)
+    last_message_is_seen = serializers.BooleanField(read_only=True, default=True)
 
     class Meta:
         model = models.PrivateChatMembership
@@ -141,6 +134,8 @@ class ChatListSerializer(serializers.ModelSerializer):
             "unseen_messages_count",
             "last_message_created_at",
             "last_message_content",
+            "last_message_sender_id",
+            "last_message_is_seen",
             'created_at',
             'updated_at',
         )
