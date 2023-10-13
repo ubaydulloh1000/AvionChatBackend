@@ -3,7 +3,7 @@ on: push
 jobs:
   execute_tests:
     name: Install requirements and run tests
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Update
         run: sudo apt-get update
