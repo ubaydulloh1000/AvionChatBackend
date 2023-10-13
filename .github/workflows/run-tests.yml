@@ -9,5 +9,7 @@ jobs:
         run: sudo apt-get update
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Install pip
+        run: sudo apt-get install python3-pip
       - name: Install requirements
-        run: pip install --upgrade pip && pip install -r requirements.txt
+        run: pip install --upgrade pip && pwd
