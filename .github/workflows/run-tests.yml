@@ -7,3 +7,7 @@ jobs:
     steps:
       - name: Update
         run: sudo apt-get update
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install requirements
+        run: pip install --upgrade pip && pip install -r requirements.txt
