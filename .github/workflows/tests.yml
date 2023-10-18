@@ -25,4 +25,4 @@ jobs:
       - name: Docker up for test
         run: docker compose -f test.yml up -d
       - name: Docker down for test
-        run: docker compose -f test.yml down
+        run: docker compose -f test.yml down -v
