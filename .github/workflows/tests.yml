@@ -15,5 +15,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: TEST
-        run: pwd && ls -alh
+      - name: Configure .env
+        run: cp .env.example .env
+      - name: Docker build for test
+        run: docker compose -f test.yml build
+      - name: Docker up for test
+        run: docker compose -f test.yml up -d
+      - name: Install requirements
+        run: docker exec -it test_shlyuzbackend-django poetry install
+      - name: Run tests
+        run: docker exec -it test_shlyuzbackend-django poetry run python manage.py migrate && poetry run python manage.py test
+      - name: Docker down for test
+        run: docker compose -f test.yml down
