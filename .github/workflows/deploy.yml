@@ -1,0 +1,30 @@
+name: CD for shlyuz backend
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy to production
+    runs-on: self-hosted
+    steps:
+      - name: Update
+        run: sudo apt-get update
+      - name: Checkout
+        uses: actions/checkout@v3
+#      - name: Install pip
+#        run: sudo apt-get install python3-pip
+#      - name: Install requirements
+#        run: pip install --upgrade pip && pwd
+#      - name: Deploy
+#        run: |
+#          cd backend
+#          pip install -r requirements.txt
+#          python3 manage.py migrate
+#          python3 manage.py collectstatic --noinput
+#          sudo systemctl restart gunicorn

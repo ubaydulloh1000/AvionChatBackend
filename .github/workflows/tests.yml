@@ -1,5 +1,13 @@
-name: Run tests
-on: push
+name: Ci for shlyuz backend
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
 jobs:
   execute_tests:
     name: Install requirements and run tests

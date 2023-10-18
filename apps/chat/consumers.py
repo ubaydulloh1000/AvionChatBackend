@@ -157,6 +157,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.channel_layer.group_send(
                 self.room_group_name, event
             )
+        elif event_type == utils.ReceiveMessageEventTypesEnum.PRIVATE_CHAT_SEE_MESSAGE.value:
+            msg = await db_operations.mark_message_as_read(text_data_json["message_id"])
+            event = {
+                "type": self.send_private_chat_message.__name__,
+                "EVENT_TYPE": utils.SendMessageEventTypesEnum.PRIVATE_CHAT_ONLINE_STATUS.value,
+                "message": MessageListSerializer(msg).data
+            }
+            await self.channel_layer.group_send(
+                self.room_group_name, event
+            )
 
     async def send_online_offline_event(self, event):
         await self.send(text_data=json.dumps(event))

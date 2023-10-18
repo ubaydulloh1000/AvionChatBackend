@@ -102,8 +102,16 @@ def get_message_by_id(mid: int) -> Message | None:
 
 
 @database_sync_to_async
-def mark_message_as_read(mid: int) -> Awaitable[None]:
-    return Message.objects.filter(id=mid).update(is_seen=True, seen_at=timezone.now())
+def mark_message_as_read(mid: int) -> Awaitable[Message | None]:
+    msg = Message.objects.filter(id=mid).first()
+    if not msg:
+        return None
+    if msg.is_seen:
+        return msg
+    msg.is_seen = True
+    msg.seen_at = timezone.now()
+    msg.save(update_fields=['is_seen', 'seen_at'])
+    return msg
 
 
 @database_sync_to_async
