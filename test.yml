@@ -60,6 +60,9 @@ services:
     restart: always
 
 volumes:
-  postgres_data: { }
-  static_volume: { }
-  media_volume: { }
+  postgres_data:
+    name: test_shlyuzbackend_postgres_data
+  static_volume:
+    name: test_shlyuzbackend_static_volume
+  media_volume:
+    name: test_shlyuzbackend_media_volume
