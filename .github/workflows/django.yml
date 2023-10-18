@@ -22,7 +22,7 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - name: Change directory
-      run: cd shlyuzbackend/shlyuzbackend && pwd
+      run: pwd && ls -alh
     # - name: Install Dependencies
     #   run: |
     #     python -m pip install --upgrade pip
