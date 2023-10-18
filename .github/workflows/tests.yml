@@ -13,8 +13,6 @@ jobs:
     name: Install requirements and run tests
     runs-on: self-hosted
     steps:
-      - name: Update
-        run: sudo apt-get update
       - name: Checkout
         uses: actions/checkout@v3
       - name: TEST
