@@ -16,7 +16,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: cd & git pull
-        run: cd ${{ github.PROJECT_HOME }} && git pull
+        run: cd ${{ env.PROJECT_HOME }} && git pull
 #      - name: Docker build for test
 #        run: docker compose -f test.yml build
 #      - name: Docker up for test
