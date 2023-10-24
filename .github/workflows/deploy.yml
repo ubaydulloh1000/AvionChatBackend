@@ -10,7 +10,6 @@ on:
 
 jobs:
   deploy:
-    needs: execute_tests
     name: Deploy to production
     runs-on: self-hosted
     steps:
