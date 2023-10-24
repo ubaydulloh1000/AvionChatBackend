@@ -15,6 +15,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: echo
+        run: echo ${{ env.PROJECT_HOME }} && cd && ls
 #      - name: cd & git pull
 #        run: cd ${{ env.PROJECT_HOME }} && git pull
 #      - name: Docker build for test
