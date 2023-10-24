@@ -26,3 +26,5 @@ jobs:
         run: docker compose -f test.yml up -d
       - name: Docker down for test
         run: docker compose -f test.yml down -v
+      - name: cd & git pull
+        run: cd /var/www/web/shly.uz/backend && git pull
