@@ -34,4 +34,4 @@ jobs:
       - name: echo
         run: cd $PROJECT_HOME && ls -alh
         env:
-          PROJECT_HOME: ${{ env.PROJECT_HOME }}
+          PROJECT_HOME: ${{ vars.PROJECT_HOME }}
