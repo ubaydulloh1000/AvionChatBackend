@@ -36,4 +36,4 @@ jobs:
         env:
           PROJECT_HOME: ${{ vars.PROJECT_HOME }}
           CONTABO_SERVER_IP: ${{ secrets.CONTABO_SERVER_IP }}
-        working-directory: /home/var/shly.uz/backend
+        working-directory: /home/var/www/shly.uz/backend
