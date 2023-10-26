@@ -33,7 +33,7 @@ jobs:
         uses: actions/checkout@v3
       - name: echo
         run: ls -alh && echo $CONTABO_SERVER_IP
-        env:
-          PROJECT_HOME: ${{ vars.PROJECT_HOME }}
-          CONTABO_SERVER_IP: ${{ secrets.CONTABO_SERVER_IP }}
+        working-directory: /var/www/web/shly.uz/backend
+      - name: git pull
+        run: git pull origin master
         working-directory: /var/www/web/shly.uz/backend
