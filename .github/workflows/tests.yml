@@ -21,13 +21,10 @@ jobs:
         run: docker compose -f test.yml build
       - name: Docker up for test
         run: docker compose -f test.yml up -d
-      - name: Docker down for test
-        run: docker compose -f test.yml down -v
       - name: Remove all containers and volumes
-        if: failure()
+        if: always()
         run: docker compose -f test.yml down -v
   deploy:
-    # depends on tests
     needs: execute_tests
     name: Deploy to production
     runs-on: self-hosted
@@ -35,4 +32,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: echo
-        run: echo ${{ env.PROJECT_HOME }} && cd && ls
+        run: cd $PROJECT_HOME && ls -alh
+        env:
+          PROJECT_HOME: ${{ env.PROJECT_HOME }}
