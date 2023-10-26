@@ -37,3 +37,6 @@ jobs:
       - name: git pull
         run: git pull origin master
         working-directory: /var/www/web/shly.uz/backend
+      - name: Docker build & and up
+        run: docker compose -f docker-compose.yml up -d --build
+        working-directory: /var/www/web/shly.uz/backend
