@@ -1,4 +1,4 @@
-name: Ci for shlyuz backend
+name: CI/CD
 
 on:
   push:
@@ -32,6 +32,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: echo
-        run: echo $PROJECT_HOME && cd $PROJECT_HOME && ls -alh
+        run: echo $PROJECT_HOME && cd $PROJECT_HOME && ls -alh && echo ${{ secrets.CONTABO_SERVER_IP }}
         env:
           PROJECT_HOME: ${{ vars.PROJECT_HOME }}
