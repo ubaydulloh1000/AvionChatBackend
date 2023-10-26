@@ -14,3 +14,4 @@ RUN pip install poetry && poetry install --no-root && poetry add gunicorn
 COPY . /app
 
 RUN chmod a+x entrypoint.sh
+ENTRYPOINT ["/app/entrypoint.sh"]
