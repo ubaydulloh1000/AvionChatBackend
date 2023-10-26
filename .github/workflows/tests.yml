@@ -32,6 +32,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: echo
-        run: cd $PROJECT_HOME && ls -alh
+        run: echo $PROJECT_HOME && cd $PROJECT_HOME && ls -alh
         env:
           PROJECT_HOME: ${{ vars.PROJECT_HOME }}
