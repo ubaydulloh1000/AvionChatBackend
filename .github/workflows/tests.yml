@@ -13,9 +13,6 @@ jobs:
     name: Install requirements and run tests
     runs-on: self-hosted
     steps:
-      # remove all containers and volumes if any error occurs
-      - name: Remove all containers and volumes
-        run: docker compose -f test.yml down -v
       - name: Checkout
         uses: actions/checkout@v3
       - name: Configure .env
@@ -26,3 +23,7 @@ jobs:
         run: docker compose -f test.yml up -d
       - name: Docker down for test
         run: docker compose -f test.yml down -v
+      - name: Remove all containers and volumes
+        if: failure()
+        run: docker compose -f test.yml down -v
+        working-directory: ${{ env.PROJECT_HOME }}
