@@ -27,6 +27,8 @@ jobs:
         if: failure()
         run: docker compose -f test.yml down -v
   deploy:
+    # depends on tests
+    needs: execute_tests
     name: Deploy to production
     runs-on: self-hosted
     steps:
