@@ -26,4 +26,11 @@ jobs:
       - name: Remove all containers and volumes
         if: failure()
         run: docker compose -f test.yml down -v
-        working-directory: ${{ env.PROJECT_HOME }}
+  deploy:
+    name: Deploy to production
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: echo
+        run: echo ${{ env.PROJECT_HOME }} && cd && ls
