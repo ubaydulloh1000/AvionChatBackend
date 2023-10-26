@@ -32,6 +32,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: echo
-        run: echo $PROJECT_HOME && cd $PROJECT_HOME && ls -alh && echo ${{ secrets.CONTABO_SERVER_IP }}
+        run: echo $PROJECT_HOME && cd $PROJECT_HOME && ls -alh && echo $CONTABO_SERVER_IP
         env:
           PROJECT_HOME: ${{ vars.PROJECT_HOME }}
+          CONTABO_SERVER_IP: ${{ secrets.CONTABO_SERVER_IP }}
