@@ -7,9 +7,9 @@ from .generator import BothHttpAndHttpsSchemaGenerator
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="Avion Chat API",
+        title="shlyuz API",
         default_version="v1",
-        description="Avion chat backend API",
+        description="shlyuz API",
         terms_of_service="https://www.google.com/policies/terms/",
         contact=openapi.Contact(email="ubaydulloh1000@gmail.com"),
         license=openapi.License(name="BSD License"),

@@ -1,0 +1,68 @@
+version: '3.8'
+
+networks:
+  default:
+    name: test_shlyuzbackend_network
+    driver: bridge
+
+services:
+  django:
+    image: shly-uz-chat-backend:test
+    build:
+      context: .
+    container_name: test_shlyuzbackend-django
+    volumes:
+      - ./:/app
+      - static_volume:/app/static
+      - media_volume:/app/media
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - redis
+    command: poetry run gunicorn core.wsgi:application --bind 0.0.0.0:8998
+    ports:
+      - "8998:8998"
+    restart: always
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: test_shlyuzbackend-postgres
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: test_postgres
+      POSTGRES_PASSWORD: test123
+      POSTGRES_DB: test_shlyuz
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    restart: always
+
+  redis:
+    image: redis:6.2-alpine
+    container_name: test_shlyuzbackend-redis
+    restart: always
+
+  daphne:
+    image: shly-uz-chat-backend:latest
+    container_name: test_shlyuzbackend-daphne
+    volumes:
+      - ./:/app
+    env_file:
+      - .env
+    depends_on:
+      - django
+    command: poetry run daphne core.asgi:application -b 0.0.0.0 -p 8999
+    ports:
+      - "8999:8999"
+    restart: always
+
+volumes:
+  postgres_data:
+    name: test_shlyuzbackend_postgres_data
+  static_volume:
+    name: test_shlyuzbackend_static_volume
+  media_volume:
+    name: test_shlyuzbackend_media_volume

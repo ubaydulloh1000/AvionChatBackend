@@ -6,12 +6,14 @@ class SendMessageEventTypesEnum(Enum):
     PRIVATE_CHAT_ONLINE_STATUS = 'private_chat_online_status'
     PRIVATE_CHAT_USER_TYPING_STATUS = 'private_chat_user_typing_status'
     PRIVATE_CHAT_SEND_MESSAGE = 'private_chat_send_message'
+    PRIVATE_CHAT_SEE_MESSAGE = 'private_chat_see_message'
 
 
 class ReceiveMessageEventTypesEnum(Enum):
     CHECK_PRIVATE_CHAT_USER_ONLINE = 'check_private_chat_user_online'
     PRIVATE_CHAT_USER_TYPING_STATUS = 'private_chat_user_typing_status'
     PRIVATE_CHAT_SEND_MESSAGE = 'private_chat_send_message'
+    PRIVATE_CHAT_SEE_MESSAGE = 'private_chat_see_message'
 
 
 @dataclass

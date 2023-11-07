@@ -1,0 +1,42 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  execute_tests:
+    name: Install requirements and run tests
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Configure .env
+        run: cp .env.example .env
+      - name: Docker build for test
+        run: docker compose -f test.yml build
+      - name: Docker up for test
+        run: docker compose -f test.yml up -d
+      - name: Remove all containers and volumes
+        if: always()
+        run: docker compose -f test.yml down -v
+  deploy:
+    needs: execute_tests
+    name: Deploy to production
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: echo
+        run: ls -alh && echo $CONTABO_SERVER_IP
+        working-directory: /var/www/web/shly.uz/backend
+      - name: git pull
+        run: git pull origin master
+        working-directory: /var/www/web/shly.uz/backend
+      - name: Docker build & and up
+        run: docker compose -f docker-compose.yml up -d --build
+        working-directory: /var/www/web/shly.uz/backend
