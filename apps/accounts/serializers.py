@@ -1,23 +1,30 @@
 from rest_framework import serializers
 
 from apps.accounts import models
+from .models import User
+from .serializer_fields import PasswordField, UsernameField, EmailField
 
 
-class UserCreateSerializer(serializers.ModelSerializer):
+class UserRegisterSerializer(serializers.ModelSerializer):
+    username = UsernameField(write_only=True)
+    email = EmailField(write_only=True)
+    password = PasswordField()
+    token = serializers.CharField(read_only=True)
+
     class Meta:
         model = models.User
         fields = (
-            "id",
             "username",
             "email",
             "password",
             "first_name",
             "last_name",
+            "token",
         )
         extra_kwargs = {
-            "password": {
-                "write_only": True,
-            }
+            "first_name": {"required": True, "write_only": True},
+            "last_name": {"required": True, "write_only": True},
+            "email": {"required": True, "write_only": True},
         }
 
     def create(self, validated_data):
@@ -26,6 +33,42 @@ class UserCreateSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+
+
+class UserRegisterConfirmSerializer(serializers.ModelSerializer):
+    token = serializers.CharField(
+        write_only=True,
+        error_messages={
+            "blank": "Token can not be blank.",
+            "required": "Token is required.",
+        }
+    )
+    otp = serializers.CharField(
+        write_only=True,
+        min_length=4,
+        max_length=4,
+        error_messages={
+            "blank": "OTP can not be blank.",
+            "required": "OTP is required.",
+            "min_length": "OTP must be 4 chars.",
+            "max_length": "OTP must be 4 chars.",
+        }
+    )
+
+    class Meta:
+        model = User
+        fields = (
+            "id",
+            "username",
+            "token",
+            "otp",
+        )
+        extra_kwargs = {
+            "username": {"read_only": True},
+        }
+
+    def create(self, validated_data):
+        return User.objects.first()
 
 
 class _AccountSettingsSerializer(serializers.ModelSerializer):

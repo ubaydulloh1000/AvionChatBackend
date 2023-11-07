@@ -1,11 +1,22 @@
+import re
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as _UserManager
+from django.core.validators import RegexValidator
 from django.db import models
 from django.apps import apps
 from django.contrib.auth.hashers import make_password
 from django.utils.translation import gettext_lazy as _
 
 from apps.base.models import TimeStampedModel
+
+
+class UserNameValidator(RegexValidator):
+    regex = r"^[a-zA-Z0-9_]{4,100}$"
+    message = _(
+        "Enter a valid username. This value may contain only letters, "
+        "numbers, and underscore(_) character."
+    )
+    flags = re.ASCII
 
 
 class UserManager(_UserManager):
@@ -53,6 +64,20 @@ class User(AbstractUser):
 
     objects = UserManager()
 
+    username_validator = UserNameValidator()
+    username = models.CharField(
+        _("username"),
+        max_length=100,
+        unique=True,
+        help_text=_(
+            "Required. 100 characters or fewer. Letters, digits and a-z,A-Z,0-9_ only."
+        ),
+        validators=[username_validator],
+        error_messages={
+            "unique": _("A user with that username already exists."),
+        },
+    )
+    email = models.EmailField(_("email address"), unique=True)
     avatar = models.ImageField(verbose_name=_("Avatar"), upload_to='accounts/avatars/%Y/%m', null=True, blank=True)
     is_online = models.BooleanField(verbose_name=_("Is Online"), default=False)
     last_seen_at = models.DateTimeField(verbose_name=_("Last Seen At"), null=True, blank=True)

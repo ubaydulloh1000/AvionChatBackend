@@ -17,8 +17,13 @@ urlpatterns = [
     ),
     path(
         "register/",
-        views.UserCreateAPIView.as_view(),
+        views.UserRegisterAPIView.as_view(),
         name="register",
+    ),
+    path(
+        "register/confirm/",
+        views.UserRegisterConfirmAPIView.as_view(),
+        name="register_confirm",
     ),
     path(
         "me/",

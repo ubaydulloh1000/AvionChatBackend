@@ -5,15 +5,25 @@ from apps.accounts.models import User
 from . import serializers
 
 __all__ = [
+    "UserRegisterAPIView",
     "AccountDetailAPIView",
     "CheckUsernameAvailableView",
+    "UserListAPIView",
+    "UserProfileAPIView",
 ]
 
 
-class UserCreateAPIView(generics.CreateAPIView):
+class UserRegisterAPIView(generics.CreateAPIView):
     permission_classes = (permissions.AllowAny,)
-    serializer_class = serializers.UserCreateSerializer
+    authentication_classes = ()
+    serializer_class = serializers.UserRegisterSerializer
     queryset = User.objects.all()
+
+
+class UserRegisterConfirmAPIView(generics.CreateAPIView):
+    permission_classes = (permissions.AllowAny,)
+    authentication_classes = ()
+    serializer_class = serializers.UserRegisterConfirmSerializer
 
 
 class AccountDetailAPIView(generics.RetrieveAPIView):
