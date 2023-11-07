@@ -79,7 +79,7 @@ class MessageListView(generics.ListAPIView):
     def get_queryset(self):
         chat = models.Chat.objects.filter(id=self.kwargs.get("pk")).first()
         if chat is None:
-            raise exceptions.NotFound()
+            return self.queryset.none()
 
         if not chat.is_permitted(self.request.user):
             raise exceptions.PermissionDenied()

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <link href="{% static 'css/bulma.min.css' %}" rel="stylesheet">
+</head>
+
+<body>
+<div class="container my-6">
+    <div class="is-flex is-flex-direction-column is-justify-content-center">
+
+        <div class="is-flex is-justify-content-center">
+
+            <form class="" method="post" action="{% url 'accounts_template:login' %}">
+
+                {% if form.errors %}
+                <p>Your username and password didn't match. Please try again.</p>
+                {% endif %}
+
+                {% if next %}
+                {% if user.is_authenticated %}
+                <p>
+                    Your account doesn't have access to this page.
+                    To proceed, please login with an account that has access.
+                </p>
+                {% else %}
+                <p>Login.</p>
+                {% endif %}
+                {% endif %}
+
+                {% csrf_token %}
+                <table class="my-4">
+                    <tr>
+                        <td class="pr-2 pb-3">{{ form.username.label_tag }}</td>
+                        <td>
+                            {{ form.username }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="pr-2 pb-3">{{ form.password.label_tag }}</td>
+                        <td>{{ form.password }}</td>
+                    </tr>
+                </table>
+
+                <input class="button is-primary" type="submit" value="login">
+                <input type="hidden" name="next" value="{{ next }}">
+            </form>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>
