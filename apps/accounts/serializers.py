@@ -1,8 +1,12 @@
+from datetime import timedelta
+
+from django.utils import timezone
 from rest_framework import serializers
 
 from apps.accounts import models
-from .models import User
+from .models import User, UserConfirmationCode
 from .serializer_fields import PasswordField, UsernameField, EmailField
+from apps.common.utils import generate_otp
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
@@ -33,6 +37,18 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        user_code = UserConfirmationCode(
+            user=instance,
+            code_type=UserConfirmationCode.CodeTypeChoices.REGISTER.value,
+            code=generate_otp(),
+            expire_at=timezone.now() + timedelta(minutes=2),
+        )
+        user_code.save()
+        data["token"] = user_code.token
+        return data
 
 
 class UserRegisterConfirmSerializer(serializers.ModelSerializer):

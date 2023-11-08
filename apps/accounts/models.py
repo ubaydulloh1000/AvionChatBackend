@@ -1,10 +1,12 @@
 import re
+import secrets
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as _UserManager
 from django.core.validators import RegexValidator
 from django.db import models
 from django.apps import apps
 from django.contrib.auth.hashers import make_password
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from apps.base.models import TimeStampedModel
@@ -115,3 +117,37 @@ class AccountSettings(TimeStampedModel):
 
     def __str__(self):
         return f"{self.user}"
+
+
+class UserConfirmationCode(TimeStampedModel):
+    class Meta:
+        db_table = "user_confirmation_code"
+        verbose_name = _("User Confirmation Code")
+        verbose_name_plural = _("User Confirmation Codes")
+
+    class CodeTypeChoices(models.TextChoices):
+        GENERAL = "general", _("General")
+        REGISTER = "register", _("Register")
+
+    user = models.ForeignKey(
+        verbose_name=_("User"),
+        to="accounts.User",
+        related_name="confirmation_codes",
+        on_delete=models.CASCADE,
+    )
+    code_type = models.CharField(
+        verbose_name=_("Code Type"),
+        max_length=20,
+        choices=CodeTypeChoices.choices,
+        default=CodeTypeChoices.GENERAL,
+    )
+    token = models.CharField(verbose_name=_("Token"), max_length=255, default=secrets.token_urlsafe, unique=True)
+    code = models.CharField(verbose_name=_("Code"), max_length=6)
+    expire_at = models.DateTimeField(verbose_name=_("Expire At"))
+
+    def __str__(self):
+        return f"{self.user} - {self.code}"
+
+    @property
+    def is_expired(self):
+        return self.expire_at < timezone.now()
