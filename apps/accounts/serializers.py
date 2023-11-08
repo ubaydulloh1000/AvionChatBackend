@@ -6,7 +6,7 @@ from rest_framework import serializers
 from apps.accounts import models
 from .models import User, UserConfirmationCode
 from .serializer_fields import PasswordField, UsernameField, EmailField
-from apps.common.utils import generate_otp
+from apps.common.utils import generate_otp, send_otp_to_email
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
@@ -47,6 +47,10 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             expire_at=timezone.now() + timedelta(minutes=2),
         )
         user_code.save()
+        send_otp_to_email(
+            otp=user_code.code,
+            receivers=[instance.email],
+        )
         data["token"] = user_code.token
         return data
 
