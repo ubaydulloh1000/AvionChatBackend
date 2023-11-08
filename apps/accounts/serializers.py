@@ -47,6 +47,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             expire_at=timezone.now() + timedelta(minutes=2),
         )
         user_code.save()
+
         send_otp_to_email(
             otp=user_code.code,
             receivers=[instance.email],
