@@ -97,13 +97,12 @@ def get_message_by_id(mid: int) -> Message | None:
     msg: Optional[models.Message] = models.Message.objects.filter(id=mid).first()
     if msg:
         return msg
-    else:
-        return None
+    return None
 
 
 @database_sync_to_async
-def mark_message_as_read(mid: int) -> Awaitable[Message | None]:
-    msg = Message.objects.filter(id=mid).first()
+def mark_message_as_read(mid: int, user_id: int) -> Awaitable[models.Message | None]:
+    msg = Message.objects.filter(id=mid, recipient_id=user_id).first()
     if not msg:
         return None
     if msg.is_seen:
@@ -111,6 +110,19 @@ def mark_message_as_read(mid: int) -> Awaitable[Message | None]:
     msg.is_seen = True
     msg.seen_at = timezone.now()
     msg.save(update_fields=['is_seen', 'seen_at'])
+    return msg
+
+
+@database_sync_to_async
+def update_message_by_id(msg_id: int, user_id: int, new_content: str) -> Awaitable[models.Message | None]:
+    msg = Message.objects.filter(id=msg_id, sender_id=user_id).first()
+    if not msg:
+        return None
+    if msg.content == new_content:
+        return msg
+    msg.content = new_content
+    msg.is_edited = True
+    msg.save(update_fields=['content', 'is_edited'])
     return msg
 
 

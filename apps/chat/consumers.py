@@ -1,7 +1,7 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 
-from asgiref.sync import sync_to_async
+from asgiref.sync import sync_to_async, async_to_sync
 from apps.chat.models import Chat, Message
 from . import utils, db_operations
 from apps.chat.serializers import MessageListSerializer
@@ -158,11 +158,29 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 self.room_group_name, event
             )
         elif event_type == utils.ReceiveMessageEventTypesEnum.PRIVATE_CHAT_SEE_MESSAGE.value:
-            msg = await db_operations.mark_message_as_read(text_data_json["message_id"])
+            msg = await db_operations.mark_message_as_read(
+                mid=text_data_json["message_id"],
+                user_id=self.scope["user"].id
+            )
             event = {
                 "type": self.send_private_chat_message.__name__,
-                "EVENT_TYPE": utils.SendMessageEventTypesEnum.PRIVATE_CHAT_ONLINE_STATUS.value,
-                "message": MessageListSerializer(msg).data
+                "EVENT_TYPE": utils.SendMessageEventTypesEnum.PRIVATE_CHAT_SEE_MESSAGE.value,
+                "is_seen": msg.is_seen,
+                "seen_at": msg.seen_at.strftime("%Y-%m-%d %H:%M:%S"),
+            }
+            await self.channel_layer.group_send(
+                self.room_group_name, event
+            )
+        elif event_type == utils.ReceiveMessageEventTypesEnum.PRIVATE_CHAT_EDIT_MESSAGE.value:
+            msg = await db_operations.update_message_by_id(
+                msg_id=text_data_json["message_id"],
+                user_id=self.scope["user"].id,
+                new_content=text_data_json["message_text"]
+            )
+            event = {
+                "type": self.send_private_chat_message.__name__,
+                "EVENT_TYPE": utils.SendMessageEventTypesEnum.PRIVATE_CHAT_EDIT_MESSAGE.value,
+                "is_edited": msg.is_edited,
             }
             await self.channel_layer.group_send(
                 self.room_group_name, event
@@ -173,7 +191,3 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def send_private_chat_message(self, event):
         await self.send(text_data=json.dumps(event))
-
-    @sync_to_async
-    def save_message_to_database(self, message, user, chat_id):
-        Message.objects.create(sender=user, chat_id=chat_id, content=message)
