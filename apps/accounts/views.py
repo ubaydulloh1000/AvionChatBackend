@@ -1,5 +1,7 @@
 from rest_framework import generics, permissions, status, views
 from rest_framework.response import Response
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 from apps.accounts.models import User
 from . import serializers
@@ -37,19 +39,24 @@ class AccountDetailAPIView(generics.RetrieveAPIView):
         return self.request.user
 
 
-class CheckUsernameAvailableView(views.APIView):
-    def get(self, request, *args, **kwargs):
-        username = request.query_params.get("username", None)
-        is_available = True
+check_username_manual_parameters = [
+    openapi.Parameter(
+        name="username",
+        in_=openapi.IN_QUERY,
+        type=openapi.TYPE_STRING,
+        description="Username to check",
+    ),
+]
 
-        if User.objects.filter(username=username).exists():
-            is_available = False
-        return Response(
-            {
-                "is_available": is_available
-            },
-            status=status.HTTP_200_OK,
-        )
+
+class CheckUsernameAvailableView(views.APIView):
+    @swagger_auto_schema(manual_parameters=check_username_manual_parameters)
+    def get(self, *args, **kwargs):
+        username = self.request.query_params.get("username", None)
+        resp_data = {
+            "is_available": User.check_is_username_available(username)
+        }
+        return Response(data=resp_data, status=status.HTTP_200_OK)
 
 
 class UserListAPIView(generics.ListAPIView):

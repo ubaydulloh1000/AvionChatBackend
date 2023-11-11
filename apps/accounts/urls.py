@@ -5,6 +5,7 @@ from . import views
 
 app_name = 'accounts'
 
+ONE_MINUTE = 60
 FIVE_MINUTES = 60 * 10
 ONE_HOUR = 60 * 60
 TWO_HOUR = ONE_HOUR * 2
@@ -37,7 +38,7 @@ urlpatterns = [
     ),
     path(
         "check-username-available/",
-        views.CheckUsernameAvailableView.as_view(),
+        cache_page(ONE_MINUTE)(views.CheckUsernameAvailableView.as_view()),
         name="check_username_available",
     ),
     path(

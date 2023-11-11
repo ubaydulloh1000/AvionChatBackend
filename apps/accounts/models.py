@@ -87,6 +87,12 @@ class User(AbstractUser):
     def __str__(self):
         return self.username
 
+    @classmethod
+    def check_is_username_available(cls, username):
+        if len(username) >= 3 and not cls.objects.filter(username=username).exists():
+            return True
+        return False
+
 
 class AccountSettings(TimeStampedModel):
     class Meta:
