@@ -1,47 +1,10 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 
-from asgiref.sync import sync_to_async, async_to_sync
-from apps.chat.models import Chat, Message
+from asgiref.sync import async_to_sync, sync_to_async
+from channels.db import database_sync_to_async
 from . import utils, db_operations
 from apps.chat.serializers import MessageListSerializer
-
-
-class UserConsumer(AsyncWebsocketConsumer):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.user_id = "None"
-        self.user_group_name = "None"
-
-    async def connect(self):
-        self.user_id = str(self.scope["url_route"]["kwargs"]["user_id"])
-        if self.user_id.isdigit() and int(self.user_id) != self.scope["user"].id:
-            await self.close()
-            return
-        self.user_group_name = "user_group_%s" % self.user_id
-
-        await self.channel_layer.group_add(
-            self.user_group_name, self.user_id
-        )
-
-        await self.accept()
-
-    async def disconnect(self, close_code):
-        await self.channel_layer.group_discard(
-            self.user_group_name, self.user_id
-        )
-
-    async def receive(self, text_data):
-        json_data = json.loads(text_data)
-        action = json_data["action"]
-
-        match action:
-            case utils.UserActionEnum.CHAT_CREATE.value:
-                print(utils.UserActionEnum.CHAT_CREATE)
-            case utils.UserActionEnum.CHAT_DELETE.value:
-                print(utils.UserActionEnum.CHAT_DELETE)
-            case _:
-                print("Unknown action")
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -165,8 +128,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             event = {
                 "type": self.send_private_chat_message.__name__,
                 "EVENT_TYPE": utils.SendMessageEventTypesEnum.PRIVATE_CHAT_SEE_MESSAGE.value,
-                "is_seen": msg.is_seen,
-                "seen_at": msg.seen_at.strftime("%Y-%m-%d %H:%M:%S"),
+                "message": msg
             }
             await self.channel_layer.group_send(
                 self.room_group_name, event
@@ -180,11 +142,27 @@ class ChatConsumer(AsyncWebsocketConsumer):
             event = {
                 "type": self.send_private_chat_message.__name__,
                 "EVENT_TYPE": utils.SendMessageEventTypesEnum.PRIVATE_CHAT_EDIT_MESSAGE.value,
-                "is_edited": msg.is_edited,
+                "message": msg,
             }
             await self.channel_layer.group_send(
                 self.room_group_name, event
             )
+        elif event_type == utils.ReceiveMessageEventTypesEnum.PRIVATE_CHAT_MESSAGE_DELETE.value:
+            message_id = text_data_json.get("message_id")
+            if not message_id or not isinstance(message_id, int):
+                return
+            msg = await db_operations.get_message_by_id(message_id)
+            if not msg:
+                return
+            is_deleted = await db_operations.soft_delete_message(msg=msg, user=self.scope["user"])
+            if not is_deleted:
+                return
+            event = {
+                "type": self.send_private_chat_message.__name__,
+                "EVENT_TYPE": utils.SendMessageEventTypesEnum.PRIVATE_CHAT_MESSAGE_DELETE.value,
+                "msg_id": msg.id
+            }
+            await self.channel_layer.group_send(self.room_group_name, event)
 
     async def send_online_offline_event(self, event):
         await self.send(text_data=json.dumps(event))

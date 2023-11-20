@@ -8,6 +8,7 @@ class SendMessageEventTypesEnum(Enum):
     PRIVATE_CHAT_SEND_MESSAGE = 'private_chat_send_message'
     PRIVATE_CHAT_SEE_MESSAGE = 'private_chat_see_message'
     PRIVATE_CHAT_EDIT_MESSAGE = 'private_chat_edit_message'
+    PRIVATE_CHAT_MESSAGE_DELETE = 'private_chat_message_delete'
 
 
 class ReceiveMessageEventTypesEnum(Enum):
@@ -16,6 +17,7 @@ class ReceiveMessageEventTypesEnum(Enum):
     PRIVATE_CHAT_SEND_MESSAGE = 'private_chat_send_message'
     PRIVATE_CHAT_SEE_MESSAGE = 'private_chat_see_message'
     PRIVATE_CHAT_EDIT_MESSAGE = 'private_chat_edit_message'
+    PRIVATE_CHAT_MESSAGE_DELETE = 'private_chat_message_delete'
 
 
 @dataclass

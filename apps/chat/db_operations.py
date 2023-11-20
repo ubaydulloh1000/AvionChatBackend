@@ -9,6 +9,7 @@ from apps.accounts.models import (
 from apps.chat import models
 from apps.chat.models import Message
 from . import utils
+from apps.chat.serializers import MessageListSerializer
 
 
 @database_sync_to_async
@@ -106,11 +107,11 @@ def mark_message_as_read(mid: int, user_id: int) -> Awaitable[models.Message | N
     if not msg:
         return None
     if msg.is_seen:
-        return msg
+        return MessageListSerializer(msg).data
     msg.is_seen = True
     msg.seen_at = timezone.now()
     msg.save(update_fields=['is_seen', 'seen_at'])
-    return msg
+    return MessageListSerializer(msg).data
 
 
 @database_sync_to_async
@@ -119,13 +120,21 @@ def update_message_by_id(msg_id: int, user_id: int, new_content: str) -> Awaitab
     if not msg:
         return None
     if msg.content == new_content:
-        return msg
+        return MessageListSerializer(msg).data
     msg.content = new_content
     msg.is_edited = True
     msg.save(update_fields=['content', 'is_edited'])
-    return msg
+    return MessageListSerializer(msg).data
 
 
 @database_sync_to_async
 def get_unread_count(sender, recipient) -> Awaitable[int]:
     return Message.get_unread_count_for_private_chat(sender, recipient)
+
+
+@database_sync_to_async
+def soft_delete_message(msg: Message, user) -> bool:
+    if msg.sender_id != user.pk:
+        return False
+    msg.soft_delete()
+    return True
