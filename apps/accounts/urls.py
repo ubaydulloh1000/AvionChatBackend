@@ -33,7 +33,7 @@ urlpatterns = [
     ),
     path(
         "me/",
-        cache_page(ONE_HOUR)(views.AccountDetailAPIView.as_view()),
+        views.AccountDetailAPIView.as_view(),
         name="account_detail",
     ),
     path(
