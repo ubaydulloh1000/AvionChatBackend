@@ -1,4 +1,4 @@
-from django.db.models import Max, F, OuterRef, Subquery, DateTimeField, TextField
+from django.db.models import Case, When, BooleanField, Value
 from rest_framework import generics, permissions, exceptions, filters
 from django_filters.rest_framework import DjangoFilterBackend
 from . import models, serializers
@@ -74,7 +74,7 @@ class MessageListView(generics.ListAPIView):
     serializer_class = serializers.MessageListSerializer
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = (DjangoFilterBackend,)
-    queryset = models.Message.objects.all()
+    queryset = models.Message.objects.active()
 
     def get_queryset(self):
         chat = models.Chat.objects.filter(id=self.kwargs.get("pk")).first()
@@ -84,5 +84,11 @@ class MessageListView(generics.ListAPIView):
         if not chat.is_permitted(self.request.user):
             raise exceptions.PermissionDenied()
 
-        qs = self.queryset.filter(chat=chat).order_by("-created_at")
-        return qs
+        qs = self.queryset.filter(chat=chat).annotate(
+            is_own_message=Case(
+                When(sender_id=self.request.user.id, then=Value(True)),
+                default=Value(False),
+                output_field=BooleanField(),
+            )
+        )
+        return qs.order_by("-created_at")

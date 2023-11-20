@@ -203,6 +203,8 @@ class Message(TimeStampedModel):
     is_edited = models.BooleanField(verbose_name=_("Is Edited"), default=False)
     is_reacted = models.BooleanField(verbose_name=_("Is Reacted"), default=False)
 
+    objects = managers.MessageQuerySet.as_manager()
+
     def __str__(self):
         return self.type
 

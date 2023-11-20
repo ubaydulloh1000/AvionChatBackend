@@ -221,19 +221,21 @@ class MessageListSerializer(serializers.ModelSerializer):
 
     sender = UserSerializer()
     recipient = UserSerializer()
+    is_own_message = serializers.BooleanField(default=False)
 
     class Meta:
         model = models.Message
         fields = (
-            'id',
-            'chat',
-            'type',
-            'sender',
-            'recipient',
-            'content',
-            'is_seen',
-            'seen_at',
-            'is_edited',
-            'is_reacted',
-            'created_at',
+            "id",
+            "chat",
+            "type",
+            "sender",
+            "recipient",
+            "content",
+            "is_seen",
+            "seen_at",
+            "is_edited",
+            "is_reacted",
+            "created_at",
+            "is_own_message",
         )

@@ -91,3 +91,8 @@ class ChannelSubscriptionQuerySet(BaseChatMembershipQuerySet):
                 )
             )
         )
+
+
+class MessageQuerySet(models.QuerySet):
+    def active(self):
+        return self.filter(is_deleted=False, deleted_at__isnull=True)
