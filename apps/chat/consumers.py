@@ -1,10 +1,8 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 
-from asgiref.sync import async_to_sync, sync_to_async
-from channels.db import database_sync_to_async
 from . import utils, db_operations
-from apps.chat.serializers import MessageListSerializer
+from apps.chat.serializers import MessageDetailSerializer
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -105,7 +103,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             event = {
                 "type": self.send_private_chat_message.__name__,
                 "EVENT_TYPE": utils.SendMessageEventTypesEnum.PRIVATE_CHAT_SEND_MESSAGE.value,
-                "message": MessageListSerializer(msg).data
+                "message": MessageDetailSerializer(msg, context={"user": self.scope["user"]}).data
             }
             await self.channel_layer.group_send(
                 self.room_group_name, event

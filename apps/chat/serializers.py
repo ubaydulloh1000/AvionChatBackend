@@ -239,3 +239,10 @@ class MessageListSerializer(serializers.ModelSerializer):
             "created_at",
             "is_own_message",
         )
+
+
+class MessageDetailSerializer(MessageListSerializer):
+    is_own_message = serializers.SerializerMethodField()
+
+    def get_is_own_message(self, obj):
+        return obj.sender_id == self.context["user"].id

@@ -1,5 +1,5 @@
 from channels.db import database_sync_to_async
-from typing import Set, Awaitable, Optional, Tuple
+from typing import Awaitable, Optional
 from django.contrib.auth.models import AbstractBaseUser
 from django.utils import timezone
 
@@ -8,8 +8,7 @@ from apps.accounts.models import (
 )
 from apps.chat import models
 from apps.chat.models import Message
-from . import utils
-from apps.chat.serializers import MessageListSerializer
+from apps.chat.serializers import MessageDetailSerializer
 
 
 @database_sync_to_async
@@ -107,11 +106,11 @@ def mark_message_as_read(mid: int, user_id: int) -> Awaitable[models.Message | N
     if not msg:
         return None
     if msg.is_seen:
-        return MessageListSerializer(msg).data
+        return MessageDetailSerializer(msg).data
     msg.is_seen = True
     msg.seen_at = timezone.now()
     msg.save(update_fields=['is_seen', 'seen_at'])
-    return MessageListSerializer(msg).data
+    return MessageDetailSerializer(msg, context={"user": msg.sender}).data
 
 
 @database_sync_to_async
@@ -120,11 +119,11 @@ def update_message_by_id(msg_id: int, user_id: int, new_content: str) -> Awaitab
     if not msg:
         return None
     if msg.content == new_content:
-        return MessageListSerializer(msg).data
+        return MessageDetailSerializer(msg, context={"user": msg.sender}).data
     msg.content = new_content
     msg.is_edited = True
     msg.save(update_fields=['content', 'is_edited'])
-    return MessageListSerializer(msg).data
+    return MessageDetailSerializer(msg, context={"user": msg.sender}).data
 
 
 @database_sync_to_async
