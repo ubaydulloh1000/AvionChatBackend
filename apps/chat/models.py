@@ -66,10 +66,36 @@ class Chat(TimeStampedModel):
 
     def is_permitted(self, user: UserModel) -> bool:
         return bool(
-            self.group_memberships.filter(user_id=user.pk).exists() or
-            self.channel_subscriptions.filter(subscriber_id=user.pk).exists() or
-            self.private_chat_memberships.filter(user_id=user.pk).exists()
+            self.chat_memberships.filter(user_id=user.pk).exists()
         )
+
+
+class ChatMembership(TimeStampedModel):
+    class Meta:
+        db_table = "chat_membership"
+        verbose_name = _("Chat Membership")
+        verbose_name_plural = _("Chat Memberships")
+        unique_together = ("chat", "user")
+
+    chat = models.ForeignKey(
+        verbose_name=_("Chat"),
+        to="chat.Chat",
+        related_name="chat_memberships",
+        on_delete=models.CASCADE,
+    )
+    user = models.ForeignKey(
+        verbose_name=_("User"),
+        to="accounts.User",
+        related_name="chat_memberships",
+        on_delete=models.CASCADE,
+    )
+    is_archived = models.BooleanField(verbose_name=_("Is Archived"), default=False)
+    is_muted = models.BooleanField(verbose_name=_("Is Muted"), default=False)
+
+    objects = managers.ChatMembershipQuerySet.as_manager()
+
+    def __str__(self):
+        return f"{self.chat} - {self.user}"
 
 
 class GroupMembership(TimeStampedModel):
@@ -94,7 +120,7 @@ class GroupMembership(TimeStampedModel):
     is_archived = models.BooleanField(verbose_name=_("Is Archived"), default=False)
     is_muted = models.BooleanField(verbose_name=_("Is Muted"), default=False)
 
-    objects = managers.GroupMembershipQuerySet.as_manager()
+    # objects = managers.GroupMembershipQuerySet.as_manager()
 
     def __str__(self):
         return f"{self.group} - {self.user}"
@@ -122,7 +148,7 @@ class ChannelSubscription(TimeStampedModel):
     is_archived = models.BooleanField(verbose_name=_("Is Archived"), default=False)
     is_muted = models.BooleanField(verbose_name=_("Is Muted"), default=False)
 
-    objects = managers.ChannelSubscriptionQuerySet.as_manager()
+    # objects = managers.ChannelSubscriptionQuerySet.as_manager()
 
     def __str__(self):
         return f"{self.channel} - {self.subscriber}"
@@ -150,7 +176,7 @@ class PrivateChatMembership(TimeStampedModel):
     is_archived = models.BooleanField(verbose_name=_("Is Archived"), default=False)
     is_muted = models.BooleanField(verbose_name=_("Is Muted"), default=False)
 
-    objects = managers.PrivateChatMembershipQuerySet.as_manager()
+    # objects = managers.PrivateChatMembershipQuerySet.as_manager()
 
     def __str__(self):
         return f"{self.chat} - {self.user}"

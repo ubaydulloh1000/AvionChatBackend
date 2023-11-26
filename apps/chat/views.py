@@ -13,41 +13,50 @@ class ChatCreateView(generics.CreateAPIView):
 class ChatListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = serializers.ChatListSerializer
-    queryset = models.PrivateChatMembership.objects.all()
+    # queryset = models.ChatMembership.objects.all()
 
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     filterset_fields = ("is_archived",)
 
-    def filter_queryset(self, queryset):
-        search_query = self.request.query_params.get("search", None)
-        user = self.request.user
+    def get_queryset(self):
+        qs = self.request.user.chat_memberships.all()
+        qs = qs.annotate_last_message(outer_ref_name="chat_id")
+        qs = qs.annotate_unseen_messages_count(self.request.user)
+        return qs.order_by("-last_message_created_at")
+        # return qs.order_by("-chat__messages__created_at").distinct()
 
-        group_chats = user.group_memberships.annotate_unseen_messages_count(user) \
-            .annotate_last_message(outer_ref_name="group_id")
-        channel_chats = user.channel_subscriptions.annotate_unseen_messages_count(user). \
-            annotate_last_message(outer_ref_name="channel_id")
-        private_chats = user.private_chat_memberships.annotate_unseen_messages_count(user). \
-            annotate_last_message(outer_ref_name="chat_id")
-
-        is_archived = self.request.query_params.get("is_archived", None)
-        if is_archived is not None:
-            is_archived = is_archived.lower() == "true"
-
-            group_chats = group_chats.filter(is_archived=is_archived)
-            channel_chats = channel_chats.filter(is_archived=is_archived)
-            private_chats = private_chats.filter(is_archived=is_archived)
-
-        if search_query:
-            search_query = search_query.lower()
-            group_chats = group_chats.filter(group__name__icontains=search_query)
-            channel_chats = channel_chats.filter(channel__name__icontains=search_query)
-            private_chats = private_chats.search_by_interlocutor(search_query, user)
-
-        group_chats.order_by("-group__messages__created_at")
-        channel_chats.order_by("-channel__messages__created_at")
-        private_chats.order_by("-chat__messages__created_at")
-
-        return group_chats.union(channel_chats, private_chats)
+    # def filter_queryset(self, queryset):
+    #     search_query = self.request.query_params.get("search", None)
+    #     user = self.request.user
+    #     # queryset =
+    #
+    #     # group_chats = user.group_memberships.annotate_unseen_messages_count(user) \
+    #     #     .annotate_last_message(outer_ref_name="group_id")
+    #     # channel_chats = user.channel_subscriptions.annotate_unseen_messages_count(user). \
+    #     #     annotate_last_message(outer_ref_name="channel_id")
+    #     # private_chats = user.private_chat_memberships.annotate_unseen_messages_count(user). \
+    #     #     annotate_last_message(outer_ref_name="chat_id")
+    #
+    #     # is_archived = self.request.query_params.get("is_archived", None)
+    #     # if is_archived is not None:
+    #     #     is_archived = is_archived.lower() == "true"
+    #     #
+    #     #     group_chats = group_chats.filter(is_archived=is_archived)
+    #     #     channel_chats = channel_chats.filter(is_archived=is_archived)
+    #     #     private_chats = private_chats.filter(is_archived=is_archived)
+    #     #
+    #     # if search_query:
+    #     #     search_query = search_query.lower()
+    #     #     group_chats = group_chats.filter(group__name__icontains=search_query)
+    #     #     channel_chats = channel_chats.filter(channel__name__icontains=search_query)
+    #     #     private_chats = private_chats.search_by_interlocutor(search_query, user)
+    #     #
+    #     # group_chats.order_by("-group__messages__created_at")
+    #     # channel_chats.order_by("-channel__messages__created_at")
+    #     # private_chats.order_by("-chat__messages__created_at")
+    #
+    #     # return private_chats
+    #     return queryset.filter(user=user).order_by("-updated_at")
 
 
 class ChatDetailView(generics.RetrieveAPIView):
@@ -56,18 +65,14 @@ class ChatDetailView(generics.RetrieveAPIView):
 
     def get_object(self):
         user = self.request.user
-        group_chats = user.group_memberships.filter(group_id=self.kwargs["chat_id"])
-        channel_chats = user.channel_subscriptions.filter(channel_id=self.kwargs["chat_id"])
-        private_chats = user.private_chat_memberships.filter(chat_id=self.kwargs["chat_id"])
+        chat_membership = models.ChatMembership.objects.filter(
+            chat_id=self.kwargs.get("chat_id"),
+            user_id=user.id,
+        ).first()
 
-        if group_chats.exists():
-            return group_chats.first()
-        elif channel_chats.exists():
-            return channel_chats.first()
-        elif private_chats.exists():
-            return private_chats.first()
-        else:
+        if chat_membership is None:
             raise exceptions.NotFound()
+        return chat_membership
 
 
 class MessageListView(generics.ListAPIView):

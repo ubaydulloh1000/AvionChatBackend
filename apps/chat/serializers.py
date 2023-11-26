@@ -73,10 +73,10 @@ class ChatCreateSerializer(serializers.ModelSerializer):
 
         if chat_type == models.Chat.ChatTypeChoices.PRIVATE:
             chat.members.add(chat.user1, chat.user2)
-            chat_membership_1 = models.PrivateChatMembership(
+            chat_membership_1 = models.ChatMembership(
                 chat=chat, user=chat.user1
             )
-            chat_membership_2 = models.PrivateChatMembership(
+            chat_membership_2 = models.ChatMembership(
                 chat=chat, user=chat.user2
             )
             chat_membership_1.save()
