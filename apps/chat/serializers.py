@@ -144,6 +144,7 @@ class ChatListSerializer(serializers.ModelSerializer):
 class ChatDetailSerializer(serializers.ModelSerializer):
     class ChatSerializer(serializers.ModelSerializer):
         user = serializers.SerializerMethodField()
+        is_own_channel = serializers.SerializerMethodField()
 
         class UserSerializer(serializers.ModelSerializer):
             class Meta:
@@ -165,6 +166,7 @@ class ChatDetailSerializer(serializers.ModelSerializer):
                 "image",
                 "type",
                 "user",
+                "is_own_channel",
             )
 
         def get_user(self, obj):
@@ -172,6 +174,11 @@ class ChatDetailSerializer(serializers.ModelSerializer):
                 if obj.user1_id == self.context["request"].user.id:
                     return self.UserSerializer(obj.user2, context={"request": self.context["request"]}).data
                 return self.UserSerializer(obj.user1, context={"request": self.context["request"]}).data
+            return None
+
+        def get_is_own_channel(self, obj):
+            if obj.type == models.Chat.ChatTypeChoices.CHANNEL:
+                return obj.owner_id == self.context["request"].user.id
             return None
 
     chat = serializers.SerializerMethodField()
