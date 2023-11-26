@@ -46,7 +46,8 @@ def set_user_offline(user: User) -> Awaitable[None]:
 
 
 @database_sync_to_async
-def save_message_to_db(chat: models.Chat, sndr: User, rcpt: User, msg_type, content) -> Awaitable[models.Message]:
+def save_message_to_db(chat: models.Chat, sndr: User, rcpt: Optional[User], msg_type, content) -> Awaitable[
+    models.Message]:
     if msg_type == Message.MessageTypeChoices.TEXT.value:
         msg = Message(
             chat=chat,

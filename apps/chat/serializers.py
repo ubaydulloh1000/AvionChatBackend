@@ -125,7 +125,7 @@ class ChatListSerializer(serializers.ModelSerializer):
     last_message_is_seen = serializers.BooleanField(read_only=True, default=True)
 
     class Meta:
-        model = models.PrivateChatMembership
+        model = models.ChatMembership
         fields = (
             'id',
             "chat",
@@ -177,7 +177,7 @@ class ChatDetailSerializer(serializers.ModelSerializer):
     chat = serializers.SerializerMethodField()
 
     class Meta:
-        model = models.PrivateChatMembership
+        model = models.ChatMembership
         fields = (
             'id',
             "chat",
@@ -233,7 +233,4 @@ class MessageListSerializer(serializers.ModelSerializer):
 
 
 class MessageDetailSerializer(MessageListSerializer):
-    is_own_message = serializers.SerializerMethodField()
-
-    def get_is_own_message(self, obj):
-        return obj.sender_id == self.context["user"].id
+    is_own_message = serializers.BooleanField(default=False)

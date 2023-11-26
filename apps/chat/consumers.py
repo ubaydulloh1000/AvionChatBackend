@@ -79,17 +79,20 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.channel_layer.group_send(
                 self.room_group_name, event
             )
-        elif event_type == utils.ReceiveMessageEventTypesEnum.PRIVATE_CHAT_SEND_MESSAGE.value:
+        elif event_type == utils.ReceiveMessageEventTypesEnum.CHAT_SEND_MESSAGE.value:
             chat_id = self.scope["url_route"]["kwargs"]["chat_id"]
             sender = self.scope["user"]
-            receiver_id = text_data_json.get("receiver_id")
+            receiver_id = text_data_json.get("receiver_id", None)
             message_type = text_data_json.get("message_type")
             message_content = text_data_json.get("message_text")
 
             chat = await db_operations.get_chat_by_id(chat_id)
-            receiver = await db_operations.get_user_by_pk(receiver_id)
+            if receiver_id:
+                receiver = await db_operations.get_user_by_pk(receiver_id)
+            else:
+                receiver = None
 
-            chat_permittable = await db_operations.check_chat_is_permitted(chat, receiver)
+            chat_permittable = await db_operations.check_chat_is_permitted(chat, sender)
             if not chat_permittable:
                 return
 
@@ -102,8 +105,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
             event = {
                 "type": self.send_private_chat_message.__name__,
-                "EVENT_TYPE": utils.SendMessageEventTypesEnum.PRIVATE_CHAT_SEND_MESSAGE.value,
-                "message": MessageDetailSerializer(msg, context={"user": self.scope["user"]}).data
+                "EVENT_TYPE": utils.SendMessageEventTypesEnum.CHAT_SEND_MESSAGE.value,
+                "message": MessageDetailSerializer(msg).data
             }
             await self.channel_layer.group_send(
                 self.room_group_name, event

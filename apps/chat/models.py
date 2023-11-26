@@ -98,90 +98,6 @@ class ChatMembership(TimeStampedModel):
         return f"{self.chat} - {self.user}"
 
 
-class GroupMembership(TimeStampedModel):
-    class Meta:
-        db_table = "group_membership"
-        verbose_name = _("Group Membership")
-        verbose_name_plural = _("Group Memberships")
-        unique_together = ("group", "user")
-
-    group = models.ForeignKey(
-        verbose_name=_("Group"),
-        to="chat.Chat",
-        related_name="group_memberships",
-        on_delete=models.CASCADE,
-    )
-    user = models.ForeignKey(
-        verbose_name=_("User"),
-        to="accounts.User",
-        related_name="group_memberships",
-        on_delete=models.CASCADE,
-    )
-    is_archived = models.BooleanField(verbose_name=_("Is Archived"), default=False)
-    is_muted = models.BooleanField(verbose_name=_("Is Muted"), default=False)
-
-    # objects = managers.GroupMembershipQuerySet.as_manager()
-
-    def __str__(self):
-        return f"{self.group} - {self.user}"
-
-
-class ChannelSubscription(TimeStampedModel):
-    class Meta:
-        db_table = "channel_subscription"
-        verbose_name = _("Channel Subscription")
-        verbose_name_plural = _("Channel Subscriptions")
-        unique_together = ("channel", "subscriber")
-
-    channel = models.ForeignKey(
-        verbose_name=_("Channel"),
-        to="chat.Chat",
-        related_name="channel_subscriptions",
-        on_delete=models.CASCADE,
-    )
-    subscriber = models.ForeignKey(
-        verbose_name=_("Subscriber"),
-        to="accounts.User",
-        related_name="channel_subscriptions",
-        on_delete=models.CASCADE,
-    )
-    is_archived = models.BooleanField(verbose_name=_("Is Archived"), default=False)
-    is_muted = models.BooleanField(verbose_name=_("Is Muted"), default=False)
-
-    # objects = managers.ChannelSubscriptionQuerySet.as_manager()
-
-    def __str__(self):
-        return f"{self.channel} - {self.subscriber}"
-
-
-class PrivateChatMembership(TimeStampedModel):
-    class Meta:
-        db_table = "private_chat_membership"
-        verbose_name = _("Private Chat Membership")
-        verbose_name_plural = _("Private Chat Memberships")
-        unique_together = ("chat", "user")
-
-    chat = models.ForeignKey(
-        verbose_name=_("Chat"),
-        to="chat.Chat",
-        related_name="private_chat_memberships",
-        on_delete=models.CASCADE,
-    )
-    user = models.ForeignKey(
-        verbose_name=_("User"),
-        to="accounts.User",
-        related_name="private_chat_memberships",
-        on_delete=models.CASCADE,
-    )
-    is_archived = models.BooleanField(verbose_name=_("Is Archived"), default=False)
-    is_muted = models.BooleanField(verbose_name=_("Is Muted"), default=False)
-
-    # objects = managers.PrivateChatMembershipQuerySet.as_manager()
-
-    def __str__(self):
-        return f"{self.chat} - {self.user}"
-
-
 class Message(TimeStampedModel):
     class Meta:
         db_table = "message"
@@ -196,7 +112,7 @@ class Message(TimeStampedModel):
         AUDIO = "AUDIO", _("Audio")
 
     chat = models.ForeignKey(
-        verbose_name=_("Private Chat"),
+        verbose_name=_("Chat"),
         to="chat.Chat",
         related_name="messages",
         on_delete=models.CASCADE,

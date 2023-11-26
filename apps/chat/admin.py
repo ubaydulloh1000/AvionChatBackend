@@ -13,22 +13,10 @@ class ChatGroupAdmin(admin.ModelAdmin):
 
 @admin.register(models.ChatMembership)
 class ChatMembershipAdmin(admin.ModelAdmin):
-    pass
-
-
-@admin.register(models.PrivateChatMembership)
-class PrivateChatMembershipAdmin(admin.ModelAdmin):
-    pass
-
-
-@admin.register(models.GroupMembership)
-class GroupMembershipAdmin(admin.ModelAdmin):
-    pass
-
-
-@admin.register(models.ChannelSubscription)
-class ChannelSubscriptionAdmin(admin.ModelAdmin):
-    pass
+    list_display = ("id", "chat", "user", "created_at", "updated_at")
+    list_display_links = ("id", "chat")
+    search_fields = ("chat__name", "user__username",)
+    autocomplete_fields = ("chat", "user",)
 
 
 @admin.register(models.Message)

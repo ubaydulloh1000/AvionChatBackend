@@ -5,16 +5,18 @@ from dataclasses import dataclass
 class SendMessageEventTypesEnum(Enum):
     PRIVATE_CHAT_ONLINE_STATUS = 'private_chat_online_status'
     PRIVATE_CHAT_USER_TYPING_STATUS = 'private_chat_user_typing_status'
-    PRIVATE_CHAT_SEND_MESSAGE = 'private_chat_send_message'
+    CHAT_SEND_MESSAGE = 'private_chat_send_message'
     PRIVATE_CHAT_SEE_MESSAGE = 'private_chat_see_message'
     PRIVATE_CHAT_EDIT_MESSAGE = 'private_chat_edit_message'
     PRIVATE_CHAT_MESSAGE_DELETE = 'private_chat_message_delete'
+
+    GROUP_CHAT_SEND_MESSAGE = 'group_chat_send_message'
 
 
 class ReceiveMessageEventTypesEnum(Enum):
     CHECK_PRIVATE_CHAT_USER_ONLINE = 'check_private_chat_user_online'
     PRIVATE_CHAT_USER_TYPING_STATUS = 'private_chat_user_typing_status'
-    PRIVATE_CHAT_SEND_MESSAGE = 'private_chat_send_message'
+    CHAT_SEND_MESSAGE = 'private_chat_send_message'
     PRIVATE_CHAT_SEE_MESSAGE = 'private_chat_see_message'
     PRIVATE_CHAT_EDIT_MESSAGE = 'private_chat_edit_message'
     PRIVATE_CHAT_MESSAGE_DELETE = 'private_chat_message_delete'
