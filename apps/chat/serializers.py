@@ -117,7 +117,7 @@ class ChatListSerializer(serializers.ModelSerializer):
                 return self._UserSerializer(obj.user1, context={"request": self.context["request"]}).data
             return None
 
-    chat = serializers.SerializerMethodField()
+    chat = _ChatSerializer()
     unseen_messages_count = serializers.IntegerField(default=0)
     last_message_created_at = serializers.DateTimeField(read_only=True, default=None)
     last_message_content = serializers.CharField(read_only=True, default="")
@@ -139,15 +139,6 @@ class ChatListSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at',
         )
-
-    def get_chat(self, obj):
-        if hasattr(obj, "chat"):
-            return self._ChatSerializer(obj.chat, context={"request": self.context["request"]}).data
-        elif hasattr(obj, "group"):
-            return self._ChatSerializer(obj.group, context={"request": self.context["request"]}).data
-        elif hasattr(obj, "channel"):
-            return self._ChatSerializer(obj.channel, context={"request": self.context["request"]}).data
-        return None
 
 
 class ChatDetailSerializer(serializers.ModelSerializer):

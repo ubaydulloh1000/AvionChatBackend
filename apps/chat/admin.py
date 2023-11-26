@@ -11,6 +11,11 @@ class ChatGroupAdmin(admin.ModelAdmin):
     list_filter = ("type", "owner",)
 
 
+@admin.register(models.ChatMembership)
+class ChatMembershipAdmin(admin.ModelAdmin):
+    pass
+
+
 @admin.register(models.PrivateChatMembership)
 class PrivateChatMembershipAdmin(admin.ModelAdmin):
     pass
@@ -28,7 +33,8 @@ class ChannelSubscriptionAdmin(admin.ModelAdmin):
 
 @admin.register(models.Message)
 class MessageAdmin(admin.ModelAdmin):
-    list_display = ("id", "chat", "sender", "type", "short_content", "created_at")
+    list_display = ("id", "chat", "sender", "type",
+                    "short_content", "created_at")
     list_display_links = ("id", "chat")
     search_fields = ("chat__name", "sender__username", "content")
     list_filter = ("chat", "sender", "type",)
