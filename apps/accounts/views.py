@@ -63,6 +63,7 @@ class UserListAPIView(generics.ListAPIView):
     permission_classes = (permissions.IsAuthenticated,)
     serializer_class = serializers.UserListSerializer
     queryset = User.objects.all()
+    search_fields = ("username", "email", "first_name", "last_name")
 
     def get_queryset(self):
         return self.queryset.exclude(id=self.request.user.id)
