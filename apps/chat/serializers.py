@@ -84,6 +84,54 @@ class ChatCreateSerializer(serializers.ModelSerializer):
         return chat
 
 
+class GroupCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Chat
+        fields = (
+            "id",
+            "name",
+            "type",
+            "owner",
+        )
+        extra_kwargs = {
+            "type": {"read_only": True},
+            "owner": {"read_only": True},
+        }
+
+    def create(self, validated_data):
+        instance = super().create(validated_data)
+        owner = self.context["request"].user
+        models.ChatMembership.objects.create(
+            chat=instance, user=owner
+        )
+        instance.members.add(owner)
+        return instance
+
+
+class ChannelCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Chat
+        fields = (
+            "id",
+            "name",
+            "type",
+            "owner",
+        )
+        extra_kwargs = {
+            "type": {"read_only": True},
+            "owner": {"read_only": True},
+        }
+
+    def create(self, validated_data):
+        instance = super().create(validated_data)
+        owner = self.context["request"].user
+        models.ChatMembership.objects.create(
+            chat=instance, user=owner
+        )
+        instance.members.add(owner)
+        return instance
+
+
 class ChatListSerializer(serializers.ModelSerializer):
     class _ChatSerializer(serializers.ModelSerializer):
         class _UserSerializer(serializers.ModelSerializer):

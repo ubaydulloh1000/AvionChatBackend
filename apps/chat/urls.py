@@ -11,6 +11,16 @@ urlpatterns = [
         name="chat-detail",
     ),
     path(
+        "GroupCreate/",
+        views.GroupCreateView.as_view(),
+        name="group-create",
+    ),
+    path(
+        "ChannelCreate/",
+        views.ChannelCreateView.as_view(),
+        name="channel-create",
+    ),
+    path(
         "<int:pk>/messages/",
         views.MessageListView.as_view(),
         name="message-list",

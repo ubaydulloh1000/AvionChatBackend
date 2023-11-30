@@ -10,6 +10,24 @@ class ChatCreateView(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
 
+class GroupCreateView(generics.CreateAPIView):
+    serializer_class = serializers.GroupCreateSerializer
+    queryset = models.Chat.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user, type=models.Chat.ChatTypeChoices.GROUP.value)
+
+
+class ChannelCreateView(generics.CreateAPIView):
+    serializer_class = serializers.ChannelCreateSerializer
+    queryset = models.Chat.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user, type=models.Chat.ChatTypeChoices.CHANNEL.value)
+
+
 class ChatListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = serializers.ChatListSerializer
@@ -21,7 +39,7 @@ class ChatListView(generics.ListAPIView):
         qs = self.request.user.chat_memberships.all().select_related("chat")
         qs = qs.annotate_last_message(outer_ref_name="chat_id")
         qs = qs.annotate_unseen_messages_count(self.request.user)
-        return qs.order_by("-last_message_created_at")
+        return qs.order_by("-updated_at", "-last_message_created_at")
 
 
 class ChatDetailView(generics.RetrieveAPIView):
