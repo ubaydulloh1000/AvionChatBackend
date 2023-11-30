@@ -45,7 +45,7 @@ class ChatListView(generics.ListAPIView):
         qs = self.request.user.chat_memberships.all().select_related("chat")
         qs = qs.annotate_last_message(outer_ref_name="chat_id")
         qs = qs.annotate_unseen_messages_count(self.request.user)
-        return qs.order_by("-updated_at", "-last_message_created_at")
+        return qs.order_by("-last_message_created_at", "-updated_at")
 
 
 class ChatDetailView(generics.RetrieveAPIView):
