@@ -89,7 +89,9 @@ class User(AbstractUser):
 
     @classmethod
     def check_is_username_available(cls, username):
-        if len(username) >= 3 and not cls.objects.filter(username=username).exists():
+        if not username:
+            return False
+        if 3 <= len(username) <= 30 and not cls.objects.filter(username=username).exists():
             return True
         return False
 

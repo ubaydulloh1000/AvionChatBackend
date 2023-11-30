@@ -19,6 +19,12 @@ class GroupCreateView(generics.CreateAPIView):
         serializer.save(owner=self.request.user, type=models.Chat.ChatTypeChoices.GROUP.value)
 
 
+class GroupOrChannelMemberCreateView(generics.CreateAPIView):
+    serializer_class = serializers.GroupOrChannelMemberCreateSerializer
+    model = models.ChatMembership
+    permission_classes = [permissions.IsAuthenticated]
+
+
 class ChannelCreateView(generics.CreateAPIView):
     serializer_class = serializers.ChannelCreateSerializer
     queryset = models.Chat.objects.all()

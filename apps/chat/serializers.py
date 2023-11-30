@@ -132,6 +132,51 @@ class ChannelCreateSerializer(serializers.ModelSerializer):
         return instance
 
 
+class GroupOrChannelMemberCreateSerializer(serializers.ModelSerializer):
+    def __init__(self, *args, **kwargs):
+        self.validators = []
+        super().__init__(*args, **kwargs)
+
+    chat = serializers.PrimaryKeyRelatedField(
+        queryset=models.Chat.objects.filter(
+            type__in=(
+                models.Chat.ChatTypeChoices.GROUP.value,
+                models.Chat.ChatTypeChoices.CHANNEL.value,
+            ),
+            is_deleted=False
+        ),
+    )
+    user = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.filter(is_active=True)
+    )
+
+    class Meta:
+        model = models.ChatMembership
+        fields = (
+            "id",
+            "chat",
+            "user",
+        )
+
+    def validate_chat(self, chat):
+        if not chat.is_permitted(self.context["request"].user):
+            raise serializers.ValidationError("You are not permitted to add members to this chat.")
+        return chat
+
+    def create(self, validated_data):
+        try:
+            membership = models.ChatMembership.objects.get(
+                chat_id=validated_data["chat"].id,
+                user_id=validated_data["user"].id
+            )
+            if membership.is_deleted:
+                membership.is_deleted = False
+                membership.save(update_fields=["is_deleted"])
+        except models.ChatMembership.DoesNotExist:
+            membership = models.ChatMembership.objects.create(**validated_data)
+        return membership
+
+
 class ChatListSerializer(serializers.ModelSerializer):
     class _ChatSerializer(serializers.ModelSerializer):
         class _UserSerializer(serializers.ModelSerializer):

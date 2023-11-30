@@ -11,12 +11,17 @@ urlpatterns = [
         name="chat-detail",
     ),
     path(
-        "GroupCreate/",
+        "groupCreate/",
         views.GroupCreateView.as_view(),
         name="group-create",
     ),
     path(
-        "ChannelCreate/",
+        "groupOrChannelMemberCreate/",
+        views.GroupOrChannelMemberCreateView.as_view(),
+        name="group-or-channel-member-create",
+    ),
+    path(
+        "channelCreate/",
         views.ChannelCreateView.as_view(),
         name="channel-create",
     ),
