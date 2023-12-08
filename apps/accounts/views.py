@@ -1,18 +1,10 @@
-from rest_framework import generics, permissions, status, views
+from rest_framework import generics, permissions, status, views, parsers
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
 from apps.accounts.models import User
 from . import serializers
-
-__all__ = [
-    "UserRegisterAPIView",
-    "AccountDetailAPIView",
-    "CheckUsernameAvailableView",
-    "UserListAPIView",
-    "UserProfileAPIView",
-]
 
 
 class UserRegisterAPIView(generics.CreateAPIView):
@@ -28,15 +20,25 @@ class UserRegisterConfirmAPIView(generics.CreateAPIView):
     serializer_class = serializers.UserRegisterConfirmSerializer
 
 
-class AccountDetailAPIView(generics.RetrieveAPIView):
+class AccountDetailUpdateAPIView(generics.RetrieveUpdateAPIView):
     """
     This endpoint retrieves the account details of the currently logged-in user.
     """
     permission_classes = (permissions.IsAuthenticated,)
-    serializer_class = serializers.AccountDetailSerializer
+    serializer_class = serializers.AccountDetailUpdateSerializer
+    http_method_names = ["get", "patch"]
+    parser_classes = [parsers.MultiPartParser, parsers.FormParser]
 
     def get_object(self):
         return self.request.user
+
+
+class AccountSettingsDetailUpdateAPIView(generics.RetrieveUpdateAPIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = serializers.AccountSettingsUpdateSerializer
+
+    def get_object(self):
+        return self.request.user.account_settings
 
 
 check_username_manual_parameters = [

@@ -33,8 +33,13 @@ urlpatterns = [
     ),
     path(
         "me/",
-        views.AccountDetailAPIView.as_view(),
-        name="account_detail",
+        views.AccountDetailUpdateAPIView.as_view(),
+        name="account-detail-update",
+    ),
+    path(
+        "me/account-settings/",
+        views.AccountSettingsDetailUpdateAPIView.as_view(),
+        name="account-settings-detail-update",
     ),
     path(
         "check-username-available/",

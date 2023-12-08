@@ -158,23 +158,38 @@ class _AccountSettingsSerializer(serializers.ModelSerializer):
         )
 
 
-class AccountDetailSerializer(serializers.ModelSerializer):
-    """
-    This serializer class serializes the account detail of the currently logged-in user.
-    """
-    account_settings = _AccountSettingsSerializer()
+class AccountDetailUpdateSerializer(serializers.ModelSerializer):
+    account_settings = _AccountSettingsSerializer(read_only=True)
 
     class Meta:
         model = models.User
         fields = (
-            'id',
+            "id",
             "username",
-            'email',
-            'first_name',
-            'last_name',
+            "email",
+            "first_name",
+            "last_name",
             "avatar",
-            'date_joined',
+            "date_joined",
             "account_settings",
+        )
+        extra_kwargs = {
+            "username": {"read_only": True},
+            "email": {"read_only": True},
+            "date_joined": {"read_only": True},
+            "first_name": {"allow_blank": False, "required": True},
+        }
+
+
+class AccountSettingsUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.AccountSettings
+        fields = (
+            "show_last_seen",
+            "show_read_receipts",
+            "allow_to_add_groups",
+            "allow_private_messages_to_non_contacts",
+            "push_notifications_enabled",
         )
 
 

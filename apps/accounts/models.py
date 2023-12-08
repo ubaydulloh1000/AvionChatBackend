@@ -2,7 +2,7 @@ import re
 import secrets
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as _UserManager
-from django.core.validators import RegexValidator
+from django.core.validators import RegexValidator, FileExtensionValidator
 from django.db import models
 from django.apps import apps
 from django.contrib.auth.hashers import make_password
@@ -78,10 +78,10 @@ class User(AbstractUser):
     username_validator = UserNameValidator()
     username = models.CharField(
         _("username"),
-        max_length=100,
+        max_length=50,
         unique=True,
         help_text=_(
-            "Required. 100 characters or fewer. Letters, digits and a-z,A-Z,0-9_ only."
+            "Required. 50 characters or fewer. Letters, digits and a-z,A-Z,0-9_ only."
         ),
         validators=[username_validator],
         error_messages={
@@ -90,7 +90,12 @@ class User(AbstractUser):
         default=default_username
     )
     email = models.EmailField(_("email address"), unique=True)
-    avatar = models.ImageField(verbose_name=_("Avatar"), upload_to='accounts/avatars/%Y/%m', null=True, blank=True)
+    avatar = models.ImageField(
+        verbose_name=_("Avatar"),
+        upload_to='accounts/avatars/%Y/%m',
+        null=True,
+        blank=True
+    )
     is_online = models.BooleanField(verbose_name=_("Is Online"), default=False)
     last_seen_at = models.DateTimeField(verbose_name=_("Last Seen At"), null=True, blank=True)
 
