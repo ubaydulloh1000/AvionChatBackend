@@ -26,7 +26,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data):
-        email = validated_data.pop("email")
+        email = validated_data.get("email")
         password = validated_data.pop("password")
 
         try:
@@ -40,13 +40,17 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        user_code = UserConfirmationCode(
-            user=instance,
-            code_type=UserConfirmationCode.CodeTypeChoices.REGISTER.value,
-            code=utils.generate_otp(),
-            expire_at=timezone.now() + timedelta(minutes=2),
-        )
-        user_code.save()
+
+        if instance.confirmation_codes.filter(expire_at__gte=timezone.now()).exists():
+            user_code = instance.confirmation_codes.filter(expire_at__gte=timezone.now()).first()
+        else:
+            user_code = UserConfirmationCode(
+                user=instance,
+                code_type=UserConfirmationCode.CodeTypeChoices.REGISTER.value,
+                code=utils.generate_otp(),
+                expire_at=timezone.now() + timedelta(minutes=2),
+            )
+            user_code.save()
 
         common_tasks.send_mail_task.apply_async(
             [user_code.code, [instance.email]],
@@ -108,8 +112,6 @@ class UserRegisterConfirmSerializer(serializers.ModelSerializer):
                 code="expired",
                 detail={"token": "Token expired!"}
             )
-
-        print(c_code.attempts)
 
         if c_code.attempts >= 3:
             raise serializers.ValidationError(
