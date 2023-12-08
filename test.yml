@@ -59,6 +59,15 @@ services:
       - "8999:8999"
     restart: always
 
+  cworker:
+    image: shly-uz-chat-backend:latest
+    container_name: test_shlyuzbackend-cworker
+    depends_on:
+      - django
+      - redis
+    command: poetry run celery -A core worker -Q lightweight-tasks
+    restart: always
+
 volumes:
   postgres_data:
     name: test_shlyuzbackend_postgres_data
