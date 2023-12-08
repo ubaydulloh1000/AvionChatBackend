@@ -40,7 +40,7 @@ class EmailField(serializers.CharField):
 
     def to_internal_value(self, data):
         data = data.lower()
-        if models.User.objects.filter(email=data).exists():
+        if models.User.objects.filter(email=data, is_active=True).exists():
             raise serializers.ValidationError(
                 "The email is already registered."
             )

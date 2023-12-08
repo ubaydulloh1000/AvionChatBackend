@@ -171,7 +171,7 @@ CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
         "LOCATION": f"{env.str('REDIS_URL', 'redis://localhost:6379/0')}",
-        "KEY_PREFIX": "django_docker_plate",
+        "KEY_PREFIX": "shlyuz-chat",
     }
 }
 

@@ -12,6 +12,15 @@ from django.utils.translation import gettext_lazy as _
 from apps.base.models import TimeStampedModel
 
 
+def default_username():
+    import uuid
+
+    username = uuid.uuid4().hex[:12]
+    while User.objects.filter(username=username).exists():
+        username = uuid.uuid4().hex[:12]
+    return username
+
+
 class UserNameValidator(RegexValidator):
     regex = r"^[a-zA-Z0-9_]{4,100}$"
     message = _(
@@ -78,6 +87,7 @@ class User(AbstractUser):
         error_messages={
             "unique": _("A user with that username already exists."),
         },
+        default=default_username
     )
     email = models.EmailField(_("email address"), unique=True)
     avatar = models.ImageField(verbose_name=_("Avatar"), upload_to='accounts/avatars/%Y/%m', null=True, blank=True)
@@ -152,6 +162,7 @@ class UserConfirmationCode(TimeStampedModel):
     token = models.CharField(verbose_name=_("Token"), max_length=255, default=secrets.token_urlsafe, unique=True)
     code = models.CharField(verbose_name=_("Code"), max_length=6)
     expire_at = models.DateTimeField(verbose_name=_("Expire At"))
+    attempts = models.PositiveSmallIntegerField(verbose_name=_("Attempts"), default=0)
 
     def __str__(self):
         return f"{self.user} - {self.code}"

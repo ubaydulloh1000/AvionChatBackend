@@ -6,11 +6,10 @@ from rest_framework import serializers
 from apps.accounts import models
 from .models import User, UserConfirmationCode
 from .serializer_fields import PasswordField, UsernameField, EmailField
-from apps.common.utils import generate_otp, send_otp_to_email
+from apps.common import utils, tasks as common_tasks
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
-    username = UsernameField(write_only=True)
     email = EmailField(write_only=True)
     password = PasswordField()
     token = serializers.CharField(read_only=True)
@@ -18,22 +17,23 @@ class UserRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.User
         fields = (
-            "username",
             "email",
             "password",
-            "first_name",
-            "last_name",
             "token",
         )
         extra_kwargs = {
-            "first_name": {"required": True, "write_only": True},
-            "last_name": {"required": True, "write_only": True},
             "email": {"required": True, "write_only": True},
         }
 
     def create(self, validated_data):
+        email = validated_data.pop("email")
         password = validated_data.pop("password")
-        user = super().create(validated_data)
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            validated_data["is_active"] = False
+            user = super().create(validated_data)
         user.set_password(password)
         user.save()
         return user
@@ -43,14 +43,15 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         user_code = UserConfirmationCode(
             user=instance,
             code_type=UserConfirmationCode.CodeTypeChoices.REGISTER.value,
-            code=generate_otp(),
+            code=utils.generate_otp(),
             expire_at=timezone.now() + timedelta(minutes=2),
         )
         user_code.save()
 
-        send_otp_to_email(
-            otp=user_code.code,
-            receivers=[instance.email],
+        common_tasks.send_mail_task.apply_async(
+            [user_code.code, [instance.email]],
+            countdown=1,
+            queue="lightweight-tasks"
         )
         data["token"] = user_code.token
         return data
@@ -81,15 +82,66 @@ class UserRegisterConfirmSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "username",
+            "email",
             "token",
             "otp",
         )
         extra_kwargs = {
             "username": {"read_only": True},
+            "email": {"read_only": True},
         }
 
+    def validate(self, attrs):
+        token = attrs["token"]
+        otp = attrs["otp"]
+
+        try:
+            c_code = UserConfirmationCode.objects.get(token=token)
+        except UserConfirmationCode.DoesNotExist:
+            raise serializers.ValidationError(
+                code="not_found",
+                detail={"token": "Invalid Token!"}
+            )
+
+        if c_code.is_expired:
+            raise serializers.ValidationError(
+                code="expired",
+                detail={"token": "Token expired!"}
+            )
+
+        print(c_code.attempts)
+
+        if c_code.attempts >= 3:
+            raise serializers.ValidationError(
+                code="attempts",
+                detail={"otp": "Too many wrong attempts!"}
+            )
+
+        if c_code.code != otp:
+            c_code.attempts += 1
+            c_code.save(update_fields=["attempts"])
+            raise serializers.ValidationError(
+                code="wrong",
+                detail={"otp": "Wrong otp!"}
+            )
+        return attrs
+
     def create(self, validated_data):
-        return User.objects.first()
+        token = validated_data.pop("token")
+
+        try:
+            c_code = UserConfirmationCode.objects.get(token=token)
+        except UserConfirmationCode.DoesNotExist:
+            raise serializers.ValidationError(
+                code="not_found",
+                detail={"token": "Invalid Token!"}
+            )
+        c_code.user.is_active = True
+        c_code.user.save(update_fields=["is_active"])
+
+        c_code.expire_at = timezone.now()
+        c_code.save(update_fields=["expire_at"])
+        return c_code.user
 
 
 class _AccountSettingsSerializer(serializers.ModelSerializer):

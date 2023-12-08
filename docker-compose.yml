@@ -59,6 +59,14 @@ services:
       - ${DAPHNE_PORT}:${DAPHNE_PORT}
     restart: always
 
+  cworker:
+    image: shly-uz-chat-backend:latest
+    depends_on:
+      - django
+      - redis
+    command: poetry run celery -A core worker -Q lightweight-tasks
+    restart: always
+
 volumes:
   postgres_data: { }
   static_volume: { }
