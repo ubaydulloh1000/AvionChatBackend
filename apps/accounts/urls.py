@@ -32,6 +32,16 @@ urlpatterns = [
         name="register_confirm",
     ),
     path(
+        "reset-password/",
+        views.ResetPasswordAPIView().as_view(),
+        name="reset-password",
+    ),
+    path(
+        "reset-password/confirm/",
+        views.ResetPasswordConfirmAPIView.as_view(),
+        name="reset-password-confirm",
+    ),
+    path(
         "me/",
         views.AccountDetailUpdateAPIView.as_view(),
         name="account-detail-update",

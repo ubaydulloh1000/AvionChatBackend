@@ -10,6 +10,15 @@ def generate_otp():
     return otp
 
 
+def generate_number_otp(cnt: int):
+    import secrets
+    digits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    otp = ""
+    for i in range(cnt):
+        otp += str(secrets.choice(digits))
+    return otp
+
+
 def send_otp_to_email(otp, receivers: list):
     content = render_to_string(
         template_name="common/email/register_confirmation.html",

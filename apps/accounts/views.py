@@ -20,6 +20,20 @@ class UserRegisterConfirmAPIView(generics.CreateAPIView):
     serializer_class = serializers.UserRegisterConfirmSerializer
 
 
+class ResetPasswordAPIView(generics.CreateAPIView):
+    permission_classes = (permissions.AllowAny,)
+    authentication_classes = ()
+    serializer_class = serializers.ResetPasswordSerializer
+    queryset = User.objects.all()
+
+
+class ResetPasswordConfirmAPIView(generics.CreateAPIView):
+    permission_classes = (permissions.AllowAny,)
+    authentication_classes = ()
+    serializer_class = serializers.ResetPasswordConfirmSerializer
+    queryset = User.objects.all()
+
+
 class AccountDetailUpdateAPIView(generics.RetrieveUpdateAPIView):
     """
     This endpoint retrieves the account details of the currently logged-in user.

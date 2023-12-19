@@ -6,9 +6,9 @@ from django.apps import apps
 
 from django.contrib.auth.models import Group
 from apps.base.admin import BaseAdmin
+from apps.accounts import models
 
 User = get_user_model()
-AccountSettings = apps.get_model("accounts", "AccountSettings")
 
 admin.site.unregister(Group)
 
@@ -50,6 +50,13 @@ class UserAdmin(BaseUserAdmin):
     )
 
 
-@admin.register(AccountSettings)
+@admin.register(models.AccountSettings)
 class AccountSettingsAdmin(BaseAdmin):
     pass
+
+
+@admin.register(models.UserConfirmationCode)
+class Admin(admin.ModelAdmin):
+    list_display = ("id", "user", "code_type", "code", "expire_at", "attempts",)
+    list_display_links = ("id", "user",)
+    list_filter = ("user", "code_type",)

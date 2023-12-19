@@ -98,6 +98,8 @@ class User(AbstractUser):
     )
     is_online = models.BooleanField(verbose_name=_("Is Online"), default=False)
     last_seen_at = models.DateTimeField(verbose_name=_("Last Seen At"), null=True, blank=True)
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["username"]
 
     def __str__(self):
         return self.username
@@ -151,6 +153,7 @@ class UserConfirmationCode(TimeStampedModel):
     class CodeTypeChoices(models.TextChoices):
         GENERAL = "general", _("General")
         REGISTER = "register", _("Register")
+        RESET_PASSWORD = "reset_password", _("Reset password")
 
     user = models.ForeignKey(
         verbose_name=_("User"),
