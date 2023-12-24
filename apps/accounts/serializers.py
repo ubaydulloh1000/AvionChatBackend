@@ -51,7 +51,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             user_code = UserConfirmationCode(
                 user=instance,
                 code_type=UserConfirmationCode.CodeTypeChoices.REGISTER.value,
-                code=utils.generate_otp(),
+                code=utils.generate_number_otp(5),
                 expire_at=timezone.now() + timedelta(minutes=2),
             )
             user_code.save()
