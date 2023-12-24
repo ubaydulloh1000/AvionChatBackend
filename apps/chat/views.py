@@ -64,6 +64,16 @@ class ChatDetailView(generics.RetrieveAPIView):
         return chat_membership
 
 
+class ChatMembershipUpdateAPIView(generics.UpdateAPIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    queryset = models.ChatMembership.objects.all()
+    serializer_class = serializers.ChatMembershipUpdateSerializer
+
+    def get_queryset(self):
+        queryset = self.queryset.filter(user_id=self.request.user.id)
+        return queryset
+
+
 class MessageListView(generics.ListAPIView):
     serializer_class = serializers.MessageListSerializer
     permission_classes = [permissions.IsAuthenticated]

@@ -297,6 +297,17 @@ class ChatDetailSerializer(serializers.ModelSerializer):
         return None
 
 
+class ChatMembershipUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.ChatMembership
+        fields = (
+            "id",
+            "is_archived",
+            "is_muted",
+            "updated_at",
+        )
+
+
 class MessageListSerializer(serializers.ModelSerializer):
     class UserSerializer(serializers.ModelSerializer):
         class Meta:

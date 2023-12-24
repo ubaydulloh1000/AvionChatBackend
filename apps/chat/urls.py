@@ -30,4 +30,9 @@ urlpatterns = [
         views.MessageListView.as_view(),
         name="message-list",
     ),
+    path(
+        "chatMembershipUpdate/<int:pk>/",
+        views.ChatMembershipUpdateAPIView.as_view(),
+        name="chatMembershipUpdate"
+    ),
 ]
