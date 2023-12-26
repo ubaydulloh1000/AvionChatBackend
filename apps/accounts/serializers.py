@@ -75,13 +75,13 @@ class UserRegisterConfirmSerializer(serializers.ModelSerializer):
     )
     otp = serializers.CharField(
         write_only=True,
-        min_length=4,
-        max_length=4,
+        min_length=5,
+        max_length=5,
         error_messages={
             "blank": "OTP can not be blank.",
             "required": "OTP is required.",
-            "min_length": "OTP must be 4 chars.",
-            "max_length": "OTP must be 4 chars.",
+            "min_length": "OTP must be 5 chars.",
+            "max_length": "OTP must be 5 chars.",
         }
     )
 
